@@ -127,6 +127,18 @@ Module.register("MMM-Portfolio", {
       wrapper.appendChild(iterDiv);
     }
 
+    // Trading mode & scalping profit
+    if (data.trading_mode) {
+      var modeDiv = document.createElement("div");
+      modeDiv.className = "portfolio-mode";
+      var modeText = data.trading_mode.charAt(0).toUpperCase() + data.trading_mode.slice(1);
+      if (data.scalping_profit_abs !== null && data.scalping_profit_abs !== undefined) {
+        modeText += " · Target: " + this.formatNumber(data.scalping_profit_abs) + " €";
+      }
+      modeDiv.innerHTML = modeText;
+      wrapper.appendChild(modeDiv);
+    }
+
     return wrapper;
   },
 

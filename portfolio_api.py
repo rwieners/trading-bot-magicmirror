@@ -139,12 +139,28 @@ def get_bot_iteration():
         pass
     return None
 
+def get_trading_settings():
+    """Read trading mode and scalping profit from user settings."""
+    try:
+        import json
+        settings_path = PROJECT_DIR / 'config' / 'user_settings.json'
+        if settings_path.exists():
+            with open(settings_path) as f:
+                s = json.load(f)
+                return s.get('trading_mode'), s.get('scalping_profit_abs')
+    except Exception:
+        pass
+    return None, None
+
 @app.route("/portfolio")
 def portfolio():
     data = get_portfolio_data()
+    trading_mode, scalping_profit = get_trading_settings()
     if data is not None:
         data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
         data['iteration'] = get_bot_iteration()
+        data['trading_mode'] = trading_mode
+        data['scalping_profit_abs'] = scalping_profit
         return jsonify(data)
     else:
         return jsonify({
@@ -152,6 +168,8 @@ def portfolio():
             "currency": None,
             "timestamp": datetime.utcnow().isoformat() + 'Z',
             "iteration": get_bot_iteration(),
+            "trading_mode": trading_mode,
+            "scalping_profit_abs": scalping_profit,
             "error": "Portfolio-Wert konnte nicht geladen werden."
         }), 500
 

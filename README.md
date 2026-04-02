@@ -105,6 +105,7 @@ The `MMM-Portfolio` module displays on the mirror:
 - Unrealized / realized P&L
 - Number of open positions
 - Last update + bot iteration
+- Trading mode + scalping profit target
 
 ### Installation on MagicMirror
 
@@ -141,6 +142,8 @@ The portfolio API (port 8090) returns:
   "realized_pnl": 12.80,
   "positions": 3,
   "iteration": 428,
+  "trading_mode": "scalping",
+  "scalping_profit_abs": 0.5,
   "currency": "EUR",
   "timestamp": "2026-04-02T10:30:00Z"
 }
