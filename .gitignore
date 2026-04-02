@@ -1,0 +1,57 @@
+# Environment variables (API keys)
+.env
+.env.local
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logging and data
+logs/
+*.log
+data/
+*.db
+
+# Models (large files)
+models/*.pt
+models/*.joblib
+
+# Backups
+*.bak
+*.backup
+*.swp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Raspi .env
+raspi/.env
+
+# Temporary files
+*.tmp
+temp/
+
+# Credentials
+CREDENTIALS.md

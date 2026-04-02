@@ -1,0 +1,2389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Bot Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'><path fill='%23667eea' d='M320 0c17.7 0 32 14.3 32 32V96H480c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H160c-35.3 0-64-28.7-64-64V160c0-35.3 28.7-64 64-64H288V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H208zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H304zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H400zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224H16c-8.8 0-16 7.2-16 16v64c0 8.8 7.2 16 16 16H48c8.8 0 16-7.2 16-16V240c0-8.8-7.2-16-16-16zm576 0c-8.8 0-16 7.2-16 16v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V240c0-8.8-7.2-16-16-16H624z'/></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --danger: #dc3545;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --bg-body: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8f9fa;
+            --bg-input: rgba(255,255,255,0.9);
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-header: #ffffff;
+            --border-color: #dee2e6;
+            --bg-detail: #f8f9fa;
+            --bg-legend: #f8f9fa;
+            --bg-summary: #e7f1ff;
+            --bg-table-row-hover: #f8f9fa;
+            --chart-bg: #fff;
+            --shadow-card: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-card: #1e1e2f;
+            --bg-card-hover: #2a2a3d;
+            --bg-input: rgba(255,255,255,0.12);
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --text-header: #e0e0e0;
+            --border-color: #3a3a4e;
+            --bg-detail: #2a2a3d;
+            --bg-legend: #1e1e2f;
+            --bg-summary: #1a2744;
+            --bg-table-row-hover: #2a2a3d;
+            --chart-bg: #1e1e2f;
+            --shadow-card: rgba(0,0,0,0.3);
+        }
+        
+        body {
+            background: var(--bg-body);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        .dashboard-container {
+            padding: 20px;
+        }
+        
+        .header {
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px var(--shadow-card);
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px var(--shadow-card);
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .stat-value.positive {
+            color: var(--success);
+        }
+        
+        .stat-value.negative {
+            color: var(--danger);
+        }
+        
+        .trade-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0d6efd;
+            box-shadow: 0 2px 4px var(--shadow-card);
+        }
+        
+        .trade-card.open {
+            border-left-color: #0d6efd;
+        }
+        
+        .trade-card.profit {
+            border-left-color: #198754;
+        }
+        
+        .trade-card.loss {
+            border-left-color: #dc3545;
+        }
+        
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .trade-symbol {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .trade-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .trade-status.open {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        
+        .trade-status.profit {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .trade-status.loss {
+            background: #f8d7da;
+            color: #842029;
+        }
+        
+        .trade-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .detail-item {
+            padding: 8px;
+            background: var(--bg-detail);
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .detail-value.positive {
+            color: #198754;
+        }
+        
+        .detail-value.negative {
+            color: #dc3545;
+        }
+        
+        .pnl-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .pnl-indicator.positive {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .pnl-indicator.negative {
+            background: #f8d7da;
+            color: #842029;
+        }
+        
+.trades-table {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+        
+        .trades-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-bottom: 3px solid #667eea !important;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Sortable table headers */
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 18px !important;
+        }
+
+        th.sortable:hover {
+            opacity: 0.85;
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
+        th.sortable.sort-asc::after {
+            content: '▲';
+            opacity: 1;
+        }
+
+        th.sortable.sort-desc::after {
+            content: '▼';
+            opacity: 1;
+        }
+        
+        .trades-table thead tr {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            letter-spacing: 0.5px !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+        
+        .trades-table tbody tr {
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        
+        .trades-table tbody tr:hover {
+            background: var(--bg-table-row-hover) !important;
+        }
+        
+        .trades-table td {
+            padding: 10px 8px;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        
+        .trades-table .positive {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .trades-table .negative {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .trades-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .section-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.5rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .spinner {
+            color: white;
+        }
+        
+        .timestamp {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .portfolio-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .portfolio-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 4px solid #0d6efd;
+            box-shadow: 0 2px 4px var(--shadow-card);
+        }
+        
+        .portfolio-item.positive {
+            border-left-color: #198754;
+        }
+        
+        .portfolio-item.negative {
+            border-left-color: #dc3545;
+        }
+        
+        .portfolio-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        
+        .portfolio-symbol {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+        
+        .portfolio-pnl-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .portfolio-pnl-badge.positive {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .portfolio-pnl-badge.negative {
+            background: #f8d7da;
+            color: #842029;
+        }
+        
+        .portfolio-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .portfolio-data {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .portfolio-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        
+        .portfolio-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .trade-card {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .chart-range-btn.active {
+            background-color: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .chart-range-btn:hover:not(.active) {
+            background-color: #e9ecef;
+        }
+
+        /* Toggle buttons container */
+        .toggle-bar {
+            position: fixed;
+            top: 12px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.35);
+            border-color: rgba(255,255,255,0.8);
+        }
+
+        /* Dark mode specific overrides */
+        [data-theme="dark"] .toggle-btn {
+            border-color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.1);
+        }
+
+        [data-theme="dark"] .settings-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .form-control {
+            background: var(--bg-input) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .input-group-text {
+            background: rgba(255,255,255,0.08) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .table {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+            color: var(--text-primary);
+            --bs-table-bg-type: rgba(255,255,255,0.03);
+        }
+
+        [data-theme="dark"] .table-hover > tbody > tr:hover > * {
+            color: var(--text-primary);
+            --bs-table-bg-state: rgba(255,255,255,0.06);
+        }
+
+        [data-theme="dark"] .alert-info {
+            background: #1a2744;
+            color: #6ea8fe;
+            border-color: #3a5a8e;
+        }
+
+        [data-theme="dark"] .alert-warning {
+            background: #332701;
+            color: #ffda6a;
+            border-color: #664d03;
+        }
+
+        [data-theme="dark"] .badge.bg-warning {
+            background: #664d03 !important;
+            color: #ffda6a !important;
+        }
+
+        [data-theme="dark"] .badge.bg-success {
+            background: #0a3622 !important;
+        }
+
+        [data-theme="dark"] .badge.bg-danger {
+            background: #58151c !important;
+        }
+
+        [data-theme="dark"] #price-chart-container {
+            background: var(--chart-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] #price-chart-container h5 {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .btn-outline-secondary {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .chart-range-btn:hover:not(.active) {
+            background-color: var(--bg-card-hover);
+        }
+
+        [data-theme="dark"] div[style*="background: #d1e7dd"] {
+            background: #0a3622 !important;
+        }
+
+        [data-theme="dark"] div[style*="background: #d1e7dd"] h4 {
+            color: #75b798 !important;
+        }
+
+        [data-theme="dark"] div[style*="background: #f8d7da"] {
+            background: #2c0b0e !important;
+        }
+
+        [data-theme="dark"] div[style*="background: #f8d7da"] h4 {
+            color: #ea868f !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Toggle Bar -->
+        <div class="toggle-bar">
+            <button class="toggle-btn" id="btn-lang" onclick="toggleLanguage()" title="Switch language">
+                <i class="fas fa-globe"></i> <span id="lang-label">EN</span>
+            </button>
+            <button class="toggle-btn" id="btn-theme" onclick="toggleTheme()" title="Toggle dark mode">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> <span data-i18n="title">Trading Bot Dashboard</span></h1>
+            <p><span data-i18n="subtitle">Echtzeit-Handelsüberwachung • Auto-Refresh alle 5 Sekunden</span></p>
+        </div>
+        
+        <!-- Settings Section -->
+        <div class="settings-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-cog fa-lg"></i>
+                <span style="font-weight: 700; font-size: 1.1rem;" data-i18n="settings_title">Trading Einstellungen</span>
+                <div id="settings-status" style="font-size: 0.85rem; margin-left: auto;"></div>
+            </div>
+            <div class="row g-3">
+                <div class="col-12 col-lg-3">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_trading_mode">Trading-Modus</label>
+                    <div class="d-flex align-items-center gap-2" style="height: 38px;">
+                        <select id="input-trading-mode" class="form-select" style="background: rgba(255,255,255,0.9); border: none; font-size: 0.85rem; max-width: 200px;">
+                            <option value="conservative" data-i18n-option="mode_conservative">Konservativ</option>
+                            <option value="aggressive" data-i18n-option="mode_aggressive">Aggressiv</option>
+                            <option value="scalping" data-i18n-option="mode_scalping">Scalping</option>
+                        </select>
+                        <span id="mode-indicator" style="font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-left: 4px;"></span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_investment">Investition</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">€</span>
+                        <input type="number" id="input-position-size" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="10" min="5" max="100" step="1">
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_stop_loss">Stop-Loss</label>
+                    <div class="input-group">
+                        <input type="number" id="input-stop-loss" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="40" min="5" max="80" step="1">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">%</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_profit_target">Gewinnziel</label>
+                    <div class="input-group">
+                        <input type="number" id="input-profit-target" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="5" min="1" max="50" step="0.5">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">%</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;">Scalping-Gewinn (fix)</label>
+                    <div class="input-group">
+                        <input type="number" id="input-scalping-profit-abs" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="0.25" min="0.01" max="10" step="0.01">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">€</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_check_interval">Signalprüfung</label>
+                    <div class="input-group">
+                        <input type="number" id="input-check-interval" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="60" min="30" max="300" step="10">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;" data-i18n="unit_sec">Sek</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_min_balance">Min. Guthaben</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">€</span>
+                        <input type="number" id="input-critical-balance" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="5" min="0" max="1000" step="1">
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label" style="font-size: 0.85rem; opacity: 0.9;" data-i18n="lbl_max_drawdown">Max. Drawdown</label>
+                    <div class="input-group">
+                        <input type="number" id="input-max-drawdown" class="form-control" style="background: rgba(255,255,255,0.9); border: none;" value="10" min="5" max="50" step="1">
+                        <span class="input-group-text" style="background: rgba(255,255,255,0.2); border: none; color: white;">%</span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-3 d-flex align-items-end">
+                    <button id="btn-save-settings" class="btn btn-light w-100" style="font-weight: 600;">
+                        <i class="fas fa-save"></i> <span data-i18n="btn_save">Speichern</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Control Section -->
+        <div id="service-control" style="background: var(--bg-card); padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px var(--shadow-card);">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-server" style="color: var(--text-primary);"></i>
+                <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);" data-i18n="svc_title">Service-Steuerung</span>
+                <div id="svc-status-msg" style="font-size: 0.85rem; margin-left: auto; color: var(--text-secondary);"></div>
+            </div>
+            <div class="row g-3 align-items-center">
+                <!-- Bot Service -->
+                <div class="col-12 col-md-5">
+                    <div class="d-flex align-items-center gap-3 p-2" style="background: var(--bg-detail); border-radius: 8px;">
+                        <div>
+                            <span id="svc-bot-indicator" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #6c757d;"></span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-primary);">Trading Bot</div>
+                            <div id="svc-bot-detail" style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="svc_checking">Prüfe...</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-success" id="btn-svc-bot-start" onclick="serviceAction('bot', 'start')" disabled title="Start">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" id="btn-svc-bot-stop" onclick="serviceAction('bot', 'stop')" disabled title="Stop">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" id="btn-svc-bot-restart" onclick="serviceAction('bot', 'restart')" disabled title="Restart">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Monitor Service -->
+                <div class="col-12 col-md-5">
+                    <div class="d-flex align-items-center gap-3 p-2" style="background: var(--bg-detail); border-radius: 8px;">
+                        <div>
+                            <span id="svc-monitor-indicator" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #6c757d;"></span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-primary);">Monitor</div>
+                            <div id="svc-monitor-detail" style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="svc_checking">Prüfe...</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-success" id="btn-svc-monitor-start" onclick="serviceAction('monitor', 'start')" disabled title="Start">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" id="btn-svc-monitor-stop" onclick="serviceAction('monitor', 'stop')" disabled title="Stop">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" id="btn-svc-monitor-restart" onclick="serviceAction('monitor', 'restart')" disabled title="Restart">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Web UI Service -->
+                <div class="col-12 col-md-5">
+                    <div class="d-flex align-items-center gap-3 p-2" style="background: var(--bg-detail); border-radius: 8px;">
+                        <div>
+                            <span id="svc-webui-indicator" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #6c757d;"></span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-primary);">Web UI</div>
+                            <div id="svc-webui-detail" style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="svc_checking">Prüfe...</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-danger" id="btn-svc-webui-stop" onclick="serviceAction('webui', 'stop')" disabled title="Stop">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" id="btn-svc-webui-restart" onclick="serviceAction('webui', 'restart')" disabled title="Restart">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- All Services -->
+                <div class="col-12 col-md-5">
+                    <div class="d-flex flex-column flex-md-row gap-1">
+                        <button class="btn btn-sm btn-outline-danger flex-fill" id="btn-svc-all-stop" onclick="serviceAction('all', 'stop')">
+                            <i class="fas fa-power-off"></i> <span data-i18n="svc_stop_all">Alles stoppen</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary flex-fill" id="btn-svc-all-restart" onclick="serviceAction('all', 'restart')">
+                            <i class="fas fa-sync"></i> <span data-i18n="svc_restart_all">Alles neustarten</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Row + Kraken Sync Button -->
+        <div class="row" id="stats-container">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label" data-i18n="stat_total_trades">Total Trades</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label" data-i18n="stat_open_positions">Open Positions</div>
+                    <div class="stat-value" id="stat-open">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label" data-i18n="stat_realized_pnl">Realisierter P&L</div>
+                    <div class="stat-value" id="stat-pnl">€0.00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label" data-i18n="stat_win_rate">Win Rate</div>
+                    <div class="stat-value" id="stat-winrate">0%</div>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex align-items-center justify-content-end">
+                <button id="btn-sync-kraken" class="btn btn-primary" style="font-weight:600;">
+                    <i class="fas fa-sync-alt"></i> <span data-i18n="btn_sync_kraken">Bestände von Kraken laden</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Portfolio/Depot Section -->
+        <div class="section-title">
+            <i class="fas fa-briefcase"></i>
+            <span data-i18n="portfolio_depot">Portfolio Depot</span>
+        </div>
+        <div id="portfolio-container">
+            <div class="loading">
+                <div class="spinner-border spinner"></div>
+                <p data-i18n="loading_portfolio">Lade Portfolio-Daten...</p>
+            </div>
+        </div>
+        
+        <!-- Price Performance Chart (static container) -->
+        <div id="price-chart-container" style="background: var(--chart-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 15px; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h5 style="color: var(--text-secondary); margin: 0;" data-i18n="price_performance">📈 Preisentwicklung</h5>
+                <div id="chart-range-buttons" style="display: flex; gap: 5px;">
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn" data-hours="1">1h</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn" data-hours="12">12h</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn active" data-hours="24">24h</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn" data-hours="48" data-i18n="days_2">2 Tage</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn" data-hours="120" data-i18n="days_5">5 Tage</button>
+                    <button class="btn btn-sm btn-outline-secondary chart-range-btn" data-hours="168" data-i18n="days_7">7 Tage</button>
+                </div>
+            </div>
+            <div style="height: 300px; position: relative;">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Open Transactions Table -->
+        <div style="background: #d1e7dd; padding: 15px; border-radius: 5px; margin-top: 40px;">
+            <h4 style="color: #0f5132; margin-bottom: 15px;" data-i18n="open_orders_title">📋 Offene Orders (Kraken)</h4>
+            <div class="table-responsive" id="open-transactions-container">
+                <table class="table table-sm table-striped" id="open-transactions">
+                    <thead style="background: #198754; color: white;">
+                        <tr>
+                            <th>Trade #</th>
+                            <th>Symbol</th>
+                            <th>Entry Price (€)</th>
+                            <th>Size (Coin)</th>
+                            <th>Invested (€)</th>
+                            <th>Entry Time</th>
+                            <th>AI Confidence</th>
+                            <th>Reason</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Closed Trades -->
+        <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-top: 40px;">
+            <h4 style="color: #842029; margin-bottom: 15px;" data-i18n="closed_trades_title">✅ Geschlossene Trades</h4>
+            <div class="table-responsive" id="closed-trades-container">
+                <table class="table table-sm table-striped" id="closed-trades">
+                    <thead style="background: #dc3545; color: white;">
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>Size</th>
+                            <th>P&L €</th>
+                            <th>P&L %</th>
+                            <th>Exit Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Timestamp -->
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+            <p class="timestamp"><span data-i18n="last_update">Letztes Update:</span> <span id="update-time">--:--:--</span></p>
+        </div>
+    </div>
+    
+    <!-- Legend / Glossary -->
+    <div id="legend-container" style="background: var(--bg-legend); border-top: 1px solid var(--border-color); padding: 20px 30px; margin-top: 30px; font-size: 0.75rem; color: var(--text-secondary);">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================================
+        // TABLE SORTING
+        // ============================================================
+        const sortStates = {};  // { tableId: { col: index, dir: 'asc'|'desc' } }
+
+        function getSortValue(cell) {
+            // Prefer data-sort attribute (used for dates / raw values)
+            const ds = cell.getAttribute('data-sort');
+            if (ds !== null) {
+                const n = parseFloat(ds);
+                return isNaN(n) ? ds : n;
+            }
+            const txt = cell.textContent.trim();
+            const num = parseFloat(txt.replace(/[€%+,]/g, ''));
+            return isNaN(num) ? txt : num;
+        }
+
+        function compareSortValues(a, b, dir) {
+            if (typeof a === 'number' && typeof b === 'number') {
+                return dir === 'asc' ? a - b : b - a;
+            }
+            const sa = String(a), sb = String(b);
+            return dir === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
+        }
+
+        function sortTableRows(table, colIdx, dir) {
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                const cellA = a.children[colIdx];
+                const cellB = b.children[colIdx];
+                if (!cellA || !cellB) return 0;
+                return compareSortValues(getSortValue(cellA), getSortValue(cellB), dir);
+            });
+            rows.forEach(r => tbody.appendChild(r));
+        }
+
+        function makeSortable(table) {
+            if (!table) return;
+            const tableId = table.id;
+            const headers = table.querySelectorAll('thead th.sortable');
+
+            headers.forEach((th, colIdx) => {
+                th.addEventListener('click', () => {
+                    // For closed-trades: sort the underlying data array, not just DOM
+                    if (tableId === 'closed-trades') {
+                        const isAsc = sortStates[tableId] && sortStates[tableId].col === colIdx && sortStates[tableId].dir === 'asc';
+                        const dir = isAsc ? 'desc' : 'asc';
+                        sortStates[tableId] = { col: colIdx, dir: dir };
+                        sortClosedTradesData(colIdx, dir);
+                        renderClosedTradesPage();
+                        return;
+                    }
+                    const isAsc = th.classList.contains('sort-asc');
+                    headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                    const dir = isAsc ? 'desc' : 'asc';
+                    th.classList.add('sort-' + dir);
+                    if (tableId) sortStates[tableId] = { col: colIdx, dir: dir };
+                    sortTableRows(table, colIdx, dir);
+                });
+            });
+
+            // Re-apply saved sort state after table rebuild
+            if (tableId && sortStates[tableId]) {
+                const s = sortStates[tableId];
+                const th = headers[s.col];
+                if (th) {
+                    headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                    th.classList.add('sort-' + s.dir);
+                    if (tableId !== 'closed-trades') {
+                        sortTableRows(table, s.col, s.dir);
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // LANGUAGE SYSTEM (DE/EN)
+        // ============================================================
+        const translations = {
+            de: {
+                title: 'Trading Bot Dashboard',
+                subtitle: 'Echtzeit-Handelsüberwachung • Auto-Refresh alle 5 Sekunden',
+                settings_title: 'Trading Einstellungen',
+                lbl_trading_mode: 'Trading-Modus',
+                mode_conservative: 'Konservativ',
+                mode_aggressive: 'Aggressiv',
+                mode_scalping: 'Scalping',
+                mode_conservative_desc: '🛡️ Konservativ',
+                mode_aggressive_desc: '🚀 Aggressiv',
+                mode_scalping_desc: '⚡ Scalping',
+                lbl_investment: 'Investition',
+                lbl_stop_loss: 'Stop-Loss',
+                lbl_profit_target: 'Gewinnziel',
+                lbl_check_interval: 'Signalprüfung',
+                lbl_min_balance: 'Min. Guthaben',
+                lbl_max_drawdown: 'Max. Drawdown',
+                unit_sec: 'Sek',
+                btn_save: 'Speichern',
+                btn_sync_kraken: 'Bestände von Kraken laden',
+                btn_syncing: 'Synchronisiere...',
+                btn_synced: 'Synchronisiert!',
+                btn_error: 'Fehler!',
+                stat_total_trades: 'Trades Gesamt',
+                stat_open_positions: 'Offene Positionen',
+                stat_realized_pnl: 'Realisierter P&L',
+                stat_win_rate: 'Gewinnrate',
+                portfolio_depot: 'Portfolio Depot',
+                loading_portfolio: 'Lade Portfolio-Daten...',
+                open_orders_title: '📋 Offene Orders (Kraken)',
+                closed_trades_title: '✅ Geschlossene Trades',
+                last_update: 'Letztes Update:',
+                no_open_positions: 'Keine offenen Positionen im Portfolio',
+                no_open_orders: 'Keine offenen Orders auf Kraken',
+                no_closed_trades: 'Noch keine geschlossenen Trades',
+                paging_page: 'Seite',
+                paging_of: 'von',
+                paging_prev: '← Zurück',
+                paging_next: 'Weiter →',
+                unable_load_prices: 'Live-Preise konnten nicht geladen werden',
+                portfolio_summary: '📊 Portfolio Zusammenfassung',
+                open_positions_label: 'Offene Positionen',
+                capital_invested: 'Investiertes Kapital',
+                available: 'Verfügbar',
+                current_value: 'Aktueller Wert',
+                unrealized_pnl: 'Unrealisierter P&L (netto)',
+                realized_pnl_label: 'Realisierter P&L (netto)',
+                total_pnl: 'Gesamt P&L',
+                incl_fees: 'inkl. Gebühren',
+                fees_label: 'Gebühren',
+                realized_unrealized: 'realisiert + unrealisiert',
+                model_age: 'Modell-Alter',
+                auto_retrain: '(Auto-Retrain alle 24h)',
+                retrain_due: '⚠ Retrain fällig',
+                model_current: '✓ Aktuell',
+                current_positions: '💼 Aktuelle Positionen',
+                th_symbol: 'Symbol',
+                th_entry_price: 'Einstiegspreis',
+                th_current_price: 'Aktueller Preis',
+                th_amount: 'Menge',
+                th_invested: 'Investiert',
+                th_current_value: 'Aktueller Wert',
+                th_pnl_eur: 'P&L €',
+                th_pnl_pct: 'P&L %',
+                th_entry_time: 'Einstiegszeit',
+                th_action: 'Aktion',
+                btn_sell: 'Verkauf',
+                price_performance: '📈 Preisentwicklung',
+                days_2: '2 Tage',
+                days_5: '5 Tage',
+                days_7: '7 Tage',
+                th_order_id: 'Order ID',
+                th_side: 'Seite',
+                th_type: 'Typ',
+                th_price: 'Preis (€)',
+                th_quantity: 'Menge',
+                th_filled: 'Gefüllt',
+                th_open: 'Offen',
+                th_status: 'Status',
+                th_time: 'Zeit',
+                side_buy: 'KAUF',
+                side_sell: 'VERKAUF',
+                th_entry: 'Einstieg',
+                th_exit: 'Ausstieg',
+                th_size: 'Größe',
+                th_exit_time: 'Verkauft am',
+                th_bought: 'Gekauft',
+                th_sold: 'Verkauft',
+                close_confirm: 'Position {symbol} schließen? Dies verkauft zum Marktpreis.',
+                close_success: 'Position {symbol} erfolgreich geschlossen!\nP&L: €{pnl} ({pnl_pct}%)',
+                close_error: 'Fehler beim Schließen der Position: {message}',
+                close_error_generic: 'Fehler beim Schließen. Details in der Konsole.',
+                saved: 'Gespeichert!',
+                error_connection: 'Verbindungsfehler',
+                val_investment: 'Investition: 5-100€',
+                val_stop_loss: 'Stop-Loss: 5-80%',
+                val_profit_target: 'Gewinnziel: 1-50%',
+                val_check_interval: 'Signalprüfung: 30-300 Sek',
+                val_min_balance: 'Min. Guthaben: ≥ 0€',
+                val_max_drawdown: 'Max. Drawdown: 5-50%',
+                change_pct: 'Veränderung %',
+                legend_title: 'Legende & Begriffserklärungen',
+                legend_pnl: '<strong>P&L</strong> – Profit & Loss (Gewinn/Verlust)',
+                legend_unrealized: '<strong>Unrealized P&L</strong> – Nicht realisierter Gewinn/Verlust (noch offene Position)',
+                legend_realized: '<strong>Realized P&L</strong> – Realisierter Gewinn/Verlust (Position geschlossen)',
+                legend_winrate: '<strong>Win Rate</strong> – Gewinnquote (% der profitablen Trades)',
+                legend_stoploss: '<strong>Stop-Loss</strong> – Automatischer Verkauf bei X% Verlust',
+                legend_profittarget: '<strong>Gewinnziel</strong> – Automatischer Verkauf bei X% Gewinn',
+                legend_signal: '<strong>Signalprüfung</strong> – Intervall für neue Handelssignale (Sek.)',
+                legend_minbalance: '<strong>Min. Guthaben</strong> – Unter diesem EUR-Betrag stoppt der Bot',
+                legend_entry: '<strong>Entry Price</strong> – Einstiegspreis (Kaufpreis)',
+                legend_coins: '<strong>BTC</strong> – Bitcoin | <strong>ETH</strong> – Ethereum | <strong>SOL</strong> – Solana',
+                legend_coins2: '<strong>XRP</strong> – Ripple | <strong>ADA</strong> – Cardano | <strong>DOGE</strong> – Dogecoin',
+                legend_ohlcv: '<strong>OHLCV</strong> – Open, High, Low, Close, Volume (Kursdaten)',
+                legend_eur: '<strong>EUR</strong> – Euro (Handelswährung)',
+                legend_confidence: '<strong>Confidence</strong> – Stärke der Preisvorhersage (0-1): ',
+                legend_conf_low: '= sehr unsicher',
+                legend_conf_mid: '= moderat',
+                legend_conf_high: '= mittel',
+                legend_conf_very_high: '= hoch (starke Bewegung erwartet)',
+                legend_drawdown: '<strong>Max. Drawdown</strong> – Maximaler Verlust vom Höchststand des Portfolios (z.B. -25% = bei 100€ Peak wird bei 75€ gestoppt)',
+                legend_profitgate: '<strong>Profit Gate</strong> – Mindestgewinn-Schwelle: Kauf nur wenn erwarteter Gewinn über diesem Wert liegt',
+                legend_tradingmode: '<strong>Trading Mode</strong> – Konservativ (wenige, sichere Trades) vs. Aggressiv (mehr Trades, kleinere Gewinne) vs. Scalping (maximale Trade-Frequenz, Micro-Profits)',
+                legend_maxpositions: '<strong>Max. Positionen</strong> – Maximale Anzahl gleichzeitig offener Positionen',
+                legend_lstm: '<strong>LSTM-Modell</strong> – KI-Modell (Long Short-Term Memory) zur Kursvorhersage, wird alle 24h neu trainiert',
+                legend_footer: 'Trading Bot Dashboard • Daten werden alle 5 Sekunden aktualisiert • Preise von Kraken Exchange',
+                svc_title: 'Service-Steuerung',
+                svc_checking: 'Prüfe...',
+                svc_running: 'Läuft',
+                svc_stopped: 'Gestoppt',
+                svc_stop_all: 'Alles stoppen',
+                svc_restart_all: 'Alles neustarten',
+                svc_confirm_stop: 'Soll der {service} wirklich gestoppt werden?',
+                svc_confirm_stop_all: 'Alle Services stoppen? Der Bot handelt dann nicht mehr und die Web UI wird beendet.',
+                svc_pid: 'PID: {pid}',
+                svc_webui_shutdown: 'Web UI wurde beendet. Starte mit ./start.sh neu.',
+                svc_webui_restarting: 'Web UI wird neu gestartet...'
+            },
+            en: {
+                title: 'Trading Bot Dashboard',
+                subtitle: 'Real-time trade monitoring • Auto-refresh every 5 seconds',
+                settings_title: 'Trading Settings',
+                lbl_trading_mode: 'Trading Mode',
+                mode_conservative: 'Conservative',
+                mode_aggressive: 'Aggressive',
+                mode_scalping: 'Scalping',
+                mode_conservative_desc: '🛡️ Conservative',
+                mode_aggressive_desc: '🚀 Aggressive',
+                mode_scalping_desc: '⚡ Scalping',
+                lbl_investment: 'Investment',
+                lbl_stop_loss: 'Stop-Loss',
+                lbl_profit_target: 'Profit Target',
+                lbl_check_interval: 'Signal Check',
+                lbl_min_balance: 'Min. Balance',
+                lbl_max_drawdown: 'Max. Drawdown',
+                unit_sec: 'Sec',
+                btn_save: 'Save',
+                btn_sync_kraken: 'Sync from Kraken',
+                btn_syncing: 'Syncing...',
+                btn_synced: 'Synced!',
+                btn_error: 'Error!',
+                stat_total_trades: 'Total Trades',
+                stat_open_positions: 'Open Positions',
+                stat_realized_pnl: 'Realized P&L',
+                stat_win_rate: 'Win Rate',
+                portfolio_depot: 'Portfolio',
+                loading_portfolio: 'Loading portfolio data...',
+                open_orders_title: '📋 Open Orders (Kraken)',
+                closed_trades_title: '✅ Closed Trades',
+                last_update: 'Last update:',
+                no_open_positions: 'No open positions in portfolio',
+                no_open_orders: 'No open orders on Kraken',
+                no_closed_trades: 'No closed trades yet',
+                paging_page: 'Page',
+                paging_of: 'of',
+                paging_prev: '← Previous',
+                paging_next: 'Next →',
+                unable_load_prices: 'Unable to load live prices',
+                portfolio_summary: '📊 Portfolio Summary',
+                open_positions_label: 'Open Positions',
+                capital_invested: 'Capital Invested',
+                available: 'Available',
+                current_value: 'Current Value',
+                unrealized_pnl: 'Unrealized P&L (net)',
+                realized_pnl_label: 'Realized P&L (net)',
+                total_pnl: 'Total P&L',
+                incl_fees: 'incl. fees',
+                fees_label: 'Fees',
+                realized_unrealized: 'realized + unrealized',
+                model_age: 'Model Age',
+                auto_retrain: '(Auto-retrain every 24h)',
+                retrain_due: '⚠ Retrain due',
+                model_current: '✓ Current',
+                current_positions: '💼 Current Positions',
+                th_symbol: 'Symbol',
+                th_entry_price: 'Entry Price',
+                th_current_price: 'Current Price',
+                th_amount: 'Amount',
+                th_invested: 'Invested',
+                th_current_value: 'Current Value',
+                th_pnl_eur: 'P&L €',
+                th_pnl_pct: 'P&L %',
+                th_entry_time: 'Entry Time',
+                th_action: 'Action',
+                btn_sell: 'Sell',
+                price_performance: '📈 Price Performance',
+                days_2: '2 Days',
+                days_5: '5 Days',
+                days_7: '7 Days',
+                th_order_id: 'Order ID',
+                th_side: 'Side',
+                th_type: 'Type',
+                th_price: 'Price (€)',
+                th_quantity: 'Quantity',
+                th_filled: 'Filled',
+                th_open: 'Open',
+                th_status: 'Status',
+                th_time: 'Time',
+                side_buy: 'BUY',
+                side_sell: 'SELL',
+                th_entry: 'Entry',
+                th_exit: 'Exit',
+                th_size: 'Size',
+                th_exit_time: 'Exit Time',
+                th_bought: 'Bought',
+                th_sold: 'Sold',
+                close_confirm: 'Close position {symbol}? This will exit the trade at market price.',
+                close_success: 'Position {symbol} closed successfully!\nP&L: €{pnl} ({pnl_pct}%)',
+                close_error: 'Error closing position: {message}',
+                close_error_generic: 'Error closing position. Check console for details.',
+                saved: 'Saved!',
+                error_connection: 'Connection error',
+                val_investment: 'Investment: 5-100€',
+                val_stop_loss: 'Stop-Loss: 5-80%',
+                val_profit_target: 'Profit Target: 1-50%',
+                val_check_interval: 'Signal Check: 30-300 Sec',
+                val_min_balance: 'Min. Balance: ≥ 0€',
+                val_max_drawdown: 'Max. Drawdown: 5-50%',
+                change_pct: 'Change %',
+                legend_title: 'Legend & Glossary',
+                legend_pnl: '<strong>P&L</strong> – Profit & Loss',
+                legend_unrealized: '<strong>Unrealized P&L</strong> – Unrealized profit/loss (open position)',
+                legend_realized: '<strong>Realized P&L</strong> – Realized profit/loss (closed position)',
+                legend_winrate: '<strong>Win Rate</strong> – Percentage of profitable trades',
+                legend_stoploss: '<strong>Stop-Loss</strong> – Auto-sell at X% loss',
+                legend_profittarget: '<strong>Profit Target</strong> – Auto-sell at X% profit',
+                legend_signal: '<strong>Signal Check</strong> – Interval for new trade signals (sec.)',
+                legend_minbalance: '<strong>Min. Balance</strong> – Bot stops below this EUR amount',
+                legend_entry: '<strong>Entry Price</strong> – Purchase price',
+                legend_coins: '<strong>BTC</strong> – Bitcoin | <strong>ETH</strong> – Ethereum | <strong>SOL</strong> – Solana',
+                legend_coins2: '<strong>XRP</strong> – Ripple | <strong>ADA</strong> – Cardano | <strong>DOGE</strong> – Dogecoin',
+                legend_ohlcv: '<strong>OHLCV</strong> – Open, High, Low, Close, Volume (price data)',
+                legend_eur: '<strong>EUR</strong> – Euro (trading currency)',
+                legend_confidence: '<strong>Confidence</strong> – Prediction strength (0-1): ',
+                legend_conf_low: '= very uncertain',
+                legend_conf_mid: '= moderate',
+                legend_conf_high: '= medium',
+                legend_conf_very_high: '= high (strong movement expected)',
+                legend_drawdown: '<strong>Max. Drawdown</strong> – Maximum loss from portfolio peak (e.g. -25% = at 100€ peak, new buys stop at 75€)',
+                legend_profitgate: '<strong>Profit Gate</strong> – Minimum profit threshold: only buy if expected gain exceeds this value',
+                legend_tradingmode: '<strong>Trading Mode</strong> – Conservative (fewer, safer trades) vs. Aggressive (more trades, smaller gains) vs. Scalping (maximum trade frequency, micro-profits)',
+                legend_maxpositions: '<strong>Max. Positions</strong> – Maximum number of simultaneously open positions',
+                legend_lstm: '<strong>LSTM Model</strong> – AI model (Long Short-Term Memory) for price prediction, retrained every 24h',
+                legend_footer: 'Trading Bot Dashboard • Data refreshes every 5 seconds • Prices from Kraken Exchange',
+                svc_title: 'Service Control',
+                svc_checking: 'Checking...',
+                svc_running: 'Running',
+                svc_stopped: 'Stopped',
+                svc_stop_all: 'Stop All',
+                svc_restart_all: 'Restart All',
+                svc_confirm_stop: 'Really stop {service}?',
+                svc_confirm_stop_all: 'Stop all services? The bot will stop trading and the Web UI will shut down.',
+                svc_pid: 'PID: {pid}',
+                svc_webui_shutdown: 'Web UI has been stopped. Restart with ./start.sh',
+                svc_webui_restarting: 'Web UI is restarting...'
+            }
+        };
+
+        let currentLang = localStorage.getItem('broker_lang') || 'de';
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key]) || key;
+        }
+
+        function applyLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+            document.getElementById('lang-label').textContent = currentLang === 'de' ? 'EN' : 'DE';
+            document.documentElement.lang = currentLang;
+            // Re-render dynamic sections
+            updateLegend();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'de' ? 'en' : 'de';
+            localStorage.setItem('broker_lang', currentLang);
+            applyLanguage();
+            // Re-load dynamic content with new language
+            loadPortfolio();
+            loadTrades();
+            loadOpenOrders();
+        }
+
+        // ============================================================
+        // DARK MODE SYSTEM
+        // ============================================================
+        let currentTheme = localStorage.getItem('broker_theme') || 'light';
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            const icon = document.getElementById('theme-icon');
+            if (currentTheme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('broker_theme', currentTheme);
+            applyTheme();
+            // Update chart colors if chart exists
+            if (priceChart) {
+                updateChartTheme();
+            }
+        }
+
+        function updateChartTheme() {
+            if (!priceChart) return;
+            const isDark = currentTheme === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+            const tickColor = isDark ? '#a0a0b0' : '#666';
+            const legendColor = isDark ? '#e0e0e0' : '#666';
+
+            priceChart.options.scales.x.grid.color = gridColor;
+            priceChart.options.scales.y.grid.color = gridColor;
+            priceChart.options.scales.x.ticks.color = tickColor;
+            priceChart.options.scales.y.ticks.color = tickColor;
+            priceChart.options.scales.y.title.color = tickColor;
+            priceChart.options.plugins.legend.labels.color = legendColor;
+            priceChart.update('none');
+        }
+
+        // Apply saved preferences immediately
+        applyTheme();
+
+        document.getElementById('btn-sync-kraken').addEventListener('click', async function() {
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-sync fa-spin"></i> ' + t('btn_syncing');
+            try {
+                const resp = await fetch('/api/sync_kraken', {method: 'POST'});
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    this.innerHTML = '<i class="fas fa-check"></i> ' + t('btn_synced');
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-sync-alt"></i> <span data-i18n="btn_sync_kraken">' + t('btn_sync_kraken') + '</span>';
+                        this.disabled = false;
+                        location.reload();
+                    }, 1500);
+                } else {
+                    this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('btn_error');
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-sync-alt"></i> <span data-i18n="btn_sync_kraken">' + t('btn_sync_kraken') + '</span>';
+                        this.disabled = false;
+                    }, 2000);
+                }
+            } catch (e) {
+                this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('btn_error');
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-sync-alt"></i> <span data-i18n="btn_sync_kraken">' + t('btn_sync_kraken') + '</span>';
+                    this.disabled = false;
+                }, 2000);
+            }
+        });
+
+        async function loadPortfolio() {
+            try {
+                const response = await fetch('/api/portfolio');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updatePortfolio(data.portfolio, data.summary);
+                }
+            } catch (error) {
+                console.error('Error loading portfolio:', error);
+                document.getElementById('portfolio-container').innerHTML = 
+                    '<div class="alert alert-warning" style="width: 100%; margin: 0;">' + t('unable_load_prices') + '</div>';
+            }
+        }
+        
+        function updatePortfolio(items, summary) {
+            const container = document.getElementById('portfolio-container');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="alert alert-info" style="width: 100%; margin: 0;">' + t('no_open_positions') + '</div>';
+                return;
+            }
+            
+            const pnlClass = summary.total_unrealized_pnl >= 0 ? 'positive' : 'negative';
+            const pnlColor = summary.total_unrealized_pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            const realizedPnl = summary.total_realized_pnl || 0;
+            const realizedPnlColor = realizedPnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            const totalFees = summary.total_fees || 0;
+            const totalPnl = realizedPnl + summary.total_unrealized_pnl;
+            const totalPnlColor = totalPnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            
+            const summaryHtml = `
+                <div class="portfolio-summary" style="background: var(--bg-summary); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="color: #0d6efd; margin: 0;">${t('portfolio_summary')}</h4>
+                    </div>
+                    <div class="row" style="margin: 0;">
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('open_positions_label')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #0d6efd;">${summary.positions}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('capital_invested')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">€${summary.total_invested.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('available')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">€${summary.available_cash.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('current_value')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">€${summary.total_current_value.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('unrealized_pnl')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: ${pnlColor};">€${summary.total_unrealized_pnl.toFixed(2)} (${summary.total_unrealized_pnl_pct >= 0 ? '+' : ''}${summary.total_unrealized_pnl_pct.toFixed(2)}%)</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">${t('incl_fees')}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('realized_pnl_label')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: ${realizedPnlColor};">€${realizedPnl.toFixed(2)}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">${t('fees_label')}: €${totalFees.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="col" style="padding: 10px; border-left: 2px solid #0d6efd;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">${t('total_pnl')}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: ${totalPnlColor};">€${totalPnl.toFixed(2)}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary);">${t('realized_unrealized')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    ${summary.model_age_hours != null ? `
+                    <div style="margin-top: 10px; padding: 8px 15px; background: ${summary.model_age_hours > 24 ? '#fff3cd' : '#d1e7dd'}; border-radius: 6px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.85rem;">🧠 ${t('model_age')}: <strong>${summary.model_age_hours.toFixed(1)}h</strong></span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">${t('auto_retrain')}</span>
+                        ${summary.model_age_hours > 24 ? '<span style="font-size: 0.75rem; color: #856404;">' + t('retrain_due') + '</span>' : '<span style="font-size: 0.75rem; color: #0f5132;">' + t('model_current') + '</span>'}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Portfolio Holdings Table
+            const tableHtml = `
+                <div style="background: var(--chart-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <h5 style="color: var(--text-secondary); margin-bottom: 15px;">${t('current_positions')}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" style="margin: 0;">
+                            <thead style="background: #0d6efd; color: white;">
+                                <tr>
+                                    <th class="sortable">${t('th_symbol')}</th>
+                                    <th class="sortable">${t('th_entry_price')}</th>
+                                    <th class="sortable">${t('th_current_price')}</th>
+                                    <th class="sortable">${t('th_amount')}</th>
+                                    <th class="sortable">${t('th_invested')}</th>
+                                    <th class="sortable">${t('th_current_value')}</th>
+                                    <th class="sortable">${t('th_pnl_eur')}</th>
+                                    <th class="sortable">${t('th_pnl_pct')}</th>
+                                    <th class="sortable">${t('th_entry_time')}</th>
+                                    <th>${t('th_action')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(item => {
+                                    const pnlEurColor = item.unrealized_pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+                                    const pnlPctColor = item.unrealized_pnl_pct >= 0 ? 'var(--success)' : 'var(--danger)';
+                                    const priceColor = item.current_price >= item.entry_price ? 'var(--success)' : 'var(--danger)';
+                                    const coinSize = (item.entry_value / item.entry_price).toFixed(6);
+                                    return `
+                                        <tr>
+                                            <td><strong>${item.symbol}</strong></td>
+                                            <td>€${item.entry_price.toFixed(2)}</td>
+                                            <td style="color: ${priceColor};">€${item.current_price.toFixed(2)}</td>
+                                            <td>${coinSize}</td>
+                                            <td>€${item.entry_value.toFixed(2)}</td>
+                                            <td>€${item.current_value.toFixed(2)}</td>
+                                            <td style="color: ${pnlEurColor}; font-weight: bold;">€${item.unrealized_pnl.toFixed(2)}</td>
+                                            <td style="color: ${pnlPctColor}; font-weight: bold;">${item.unrealized_pnl_pct >= 0 ? '+' : ''}${item.unrealized_pnl_pct.toFixed(2)}%</td>
+                                            <td data-sort="${item.entry_time || ''}"><small>${item.entry_time}</small></td>
+                                            <td><button class="btn btn-sm btn-danger" onclick="closePosition(${item.id}, '${item.symbol}')" style="padding: 2px 8px; font-size: 0.75rem;">${t('btn_sell')}</button></td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = summaryHtml + tableHtml;
+            
+            // Enable sorting on portfolio table
+            const portfolioTable = container.querySelector('table');
+            if (portfolioTable) makeSortable(portfolioTable);
+            
+            // Show the chart container (it's hidden initially)
+            const chartContainer = document.getElementById('price-chart-container');
+            if (chartContainer) {
+                chartContainer.style.display = 'block';
+            }
+        }
+        
+        async function loadTrades() {
+            try {
+                console.log('Loading trades...');
+                const response = await fetch('/api/trades');
+                const data = await response.json();
+                console.log('Trades loaded:', data.status, 'Open:', data.open_trades?.length, 'Closed:', data.closed_trades?.length);
+                
+                if (data.status === 'success') {
+                    try {
+                        updateStats(data.stats);
+                    } catch (e) {
+                        console.error('Error in updateStats:', e);
+                    }
+                    
+                    try {
+                        updateClosedTrades(data.closed_trades || []);
+                    } catch (e) {
+                        console.error('Error in updateClosedTrades:', e);
+                    }
+                    
+                    updateTimestamp();
+                }
+            } catch (error) {
+                console.error('Error loading trades:', error);
+            }
+        }
+        
+        async function loadOpenOrders() {
+            try {
+                const response = await fetch('/api/open_orders');
+                const data = await response.json();
+                updateOpenTransactionsTable(data.open_orders || []);
+            } catch (e) {
+                console.error('Error loading open orders:', e);
+            }
+        }
+
+        function updateOpenTransactionsTable(orders) {
+            const container = document.getElementById('open-transactions-container');
+            
+            if (!container) {
+                console.error('Container not found!');
+                return;
+            }
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="alert alert-info" style="margin: 0;">' + t('no_open_orders') + '</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table class="table table-sm table-striped trades-table" id="open-transactions">
+                    <thead>
+                        <tr>
+                            <th class="sortable">${t('th_order_id')}</th>
+                            <th class="sortable">${t('th_symbol')}</th>
+                            <th class="sortable">${t('th_side')}</th>
+                            <th class="sortable">${t('th_type')}</th>
+                            <th class="sortable">${t('th_price')}</th>
+                            <th class="sortable">${t('th_quantity')}</th>
+                            <th class="sortable">${t('th_filled')}</th>
+                            <th class="sortable">${t('th_open')}</th>
+                            <th class="sortable">${t('th_status')}</th>
+                            <th class="sortable">${t('th_time')}</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            `;
+            
+            const tbody = document.querySelector('#open-transactions tbody');
+            tbody.innerHTML = orders.map(order => {
+                const sideColor = order.side === 'buy' ? '#198754' : '#dc3545';
+                const sideLabel = order.side === 'buy' ? t('side_buy') : t('side_sell');
+                const price = order.price ? `€${order.price.toFixed(2)}` : 'Market';
+                const dt = order.timestamp ? order.timestamp.substring(0, 16).replace('T', ' ') : '-';
+                
+                return `
+                    <tr>
+                        <td data-sort="${order.id}"><small>${order.id}</small></td>
+                        <td><strong>${order.symbol}</strong></td>
+                        <td style="color: ${sideColor}; font-weight: bold;">${sideLabel}</td>
+                        <td>${(order.type || '').toUpperCase()}</td>
+                        <td>${price}</td>
+                        <td>${order.amount.toFixed(6)}</td>
+                        <td>${order.filled.toFixed(6)}</td>
+                        <td>${order.remaining.toFixed(6)}</td>
+                        <td><span class="badge bg-warning">${order.status}</span></td>
+                        <td data-sort="${order.timestamp || ''}"><small>${dt}</small></td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Enable sorting on open transactions table
+            makeSortable(document.getElementById('open-transactions'));
+        }
+        
+        async function closePosition(tradeId, symbol) {
+            if (!confirm(t('close_confirm').replace('{symbol}', symbol))) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/close-position/${tradeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert(t('close_success').replace('{symbol}', symbol).replace('{pnl}', data.pnl.toFixed(2)).replace('{pnl_pct}', data.pnl_pct.toFixed(2)));
+                    loadPortfolio();
+                    loadTrades();
+                    loadOpenOrders();
+                } else {
+                    alert(t('close_error').replace('{message}', data.message));
+                }
+            } catch (error) {
+                console.error('Error closing position:', error);
+                alert(t('close_error_generic'));
+            }
+        }
+        
+        function updateStats(stats) {
+            document.getElementById('stat-total').textContent = stats.total_trades;
+            document.getElementById('stat-open').textContent = stats.open_positions;
+            
+            const pnlElement = document.getElementById('stat-pnl');
+            pnlElement.textContent = `€${stats.total_pnl.toFixed(2)}`;
+            pnlElement.className = 'stat-value ' + (stats.total_pnl >= 0 ? 'positive' : 'negative');
+            
+            document.getElementById('stat-winrate').textContent = `${stats.win_rate}%`;
+        }
+        
+        // Pagination state for closed trades
+        let closedTradesData = [];
+        let closedTradesPage = 1;
+        const closedTradesPerPage = 10;
+
+        // Sort keys for mapping closed trades columns to data fields
+        const closedTradesFields = [
+            t => t.symbol,
+            t => t.entry_price,
+            t => t.exit_price,
+            t => t.entry_size,
+            t => t.pnl,
+            t => t.pnl_pct,
+            t => t.entry_time || '',
+            t => t.exit_time || '',
+            t => t.status
+        ];
+
+        function sortClosedTradesData(colIdx, dir) {
+            const accessor = closedTradesFields[colIdx];
+            if (!accessor) return;
+            closedTradesData.sort((a, b) => {
+                const va = accessor(a), vb = accessor(b);
+                if (typeof va === 'number' && typeof vb === 'number') {
+                    return dir === 'asc' ? va - vb : vb - va;
+                }
+                return dir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+            });
+        }
+
+        function updateClosedTrades(trades) {
+            closedTradesData = trades;
+            // Apply existing sort if user has sorted before
+            const s = sortStates['closed-trades'];
+            if (s) {
+                sortClosedTradesData(s.col, s.dir);
+            } else {
+                closedTradesPage = 1;
+            }
+            renderClosedTradesPage();
+        }
+
+        function renderClosedTradesPage() {
+            const trades = closedTradesData;
+            const container = document.getElementById('closed-trades-container');
+            
+            if (trades.length === 0) {
+                container.innerHTML = '<div class="alert alert-info" style="margin: 0;">' + t('no_closed_trades') + '</div>';
+                return;
+            }
+
+            const totalPages = Math.ceil(trades.length / closedTradesPerPage);
+            if (closedTradesPage > totalPages) closedTradesPage = totalPages;
+            if (closedTradesPage < 1) closedTradesPage = 1;
+            const start = (closedTradesPage - 1) * closedTradesPerPage;
+            const pageTrades = trades.slice(start, start + closedTradesPerPage);
+            
+            // Re-create table structure
+            container.innerHTML = `
+                <table class="table table-sm table-striped trades-table" id="closed-trades">
+                    <thead>
+                        <tr>
+                            <th class="sortable">${t('th_symbol')}</th>
+                            <th class="sortable">${t('th_entry')}</th>
+                            <th class="sortable">${t('th_exit')}</th>
+                            <th class="sortable">${t('th_size')}</th>
+                            <th class="sortable">${t('th_pnl_eur')}</th>
+                            <th class="sortable">${t('th_pnl_pct')}</th>
+                            <th class="sortable">${t('th_bought')}</th>
+                            <th class="sortable">${t('th_sold')}</th>
+                            <th class="sortable">${t('th_status')}</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                ${totalPages > 1 ? `
+                <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px;">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="closedTradesPagePrev()" ${closedTradesPage <= 1 ? 'disabled' : ''}>${t('paging_prev')}</button>
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">${t('paging_page')} ${closedTradesPage} ${t('paging_of')} ${totalPages}</span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="closedTradesPageNext()" ${closedTradesPage >= totalPages ? 'disabled' : ''}>${t('paging_next')}</button>
+                </div>` : ''}
+            `;
+            
+            const tbody = document.querySelector('#closed-trades tbody');
+            tbody.innerHTML = pageTrades.map(trade => {
+                const pnlClass = trade.pnl >= 0 ? 'positive' : 'negative';
+                const statusClass = trade.pnl >= 0 ? 'success' : 'danger';
+                // Format datetime: "2026-02-24 14:30:15" -> "24.02. 14:30"
+                const formatDateTime = (dt) => {
+                    if (!dt) return '-';
+                    const parts = dt.split(' ');
+                    const dateParts = parts[0].split('-');
+                    const time = parts[1] ? parts[1].substring(0, 5) : '';
+                    return `${dateParts[2]}.${dateParts[1]}. ${time}`;
+                };
+                
+                return `
+                    <tr>
+                        <td><strong>${trade.symbol}</strong></td>
+                        <td>€${trade.entry_price.toFixed(2)}</td>
+                        <td>€${trade.exit_price.toFixed(2)}</td>
+                        <td>€${trade.entry_size.toFixed(2)}</td>
+                        <td class="${pnlClass}">€${trade.pnl.toFixed(2)}</td>
+                        <td class="${pnlClass}">${trade.pnl_pct.toFixed(2)}%</td>
+                        <td data-sort="${trade.entry_time || ''}"><small>${formatDateTime(trade.entry_time)}</small></td>
+                        <td data-sort="${trade.exit_time || ''}"><small>${formatDateTime(trade.exit_time)}</small></td>
+                        <td><span class="badge bg-${statusClass}">${trade.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Enable sorting on closed trades table
+            makeSortable(document.getElementById('closed-trades'));
+        }
+
+        function closedTradesPagePrev() {
+            if (closedTradesPage > 1) {
+                closedTradesPage--;
+                renderClosedTradesPage();
+            }
+        }
+
+        function closedTradesPageNext() {
+            const totalPages = Math.ceil(closedTradesData.length / closedTradesPerPage);
+            if (closedTradesPage < totalPages) {
+                closedTradesPage++;
+                renderClosedTradesPage();
+            }
+        }
+        
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('update-time').textContent = 
+                now.toLocaleTimeString('de-DE');
+        }
+        
+        // Price chart instance
+        let priceChart = null;
+        let currentChartHours = 24;  // Default to 24 hours
+        
+        // Color palette for different currencies
+        const chartColors = [
+            { bg: 'rgba(247, 147, 26, 0.2)', border: 'rgb(247, 147, 26)' },   // BTC - Orange
+            { bg: 'rgba(98, 126, 234, 0.2)', border: 'rgb(98, 126, 234)' },   // ETH - Blue
+            { bg: 'rgba(220, 31, 255, 0.2)', border: 'rgb(220, 31, 255)' },   // SOL - Purple
+            { bg: 'rgba(35, 41, 47, 0.2)', border: 'rgb(35, 41, 47)' },       // XRP - Dark
+            { bg: 'rgba(0, 117, 220, 0.2)', border: 'rgb(0, 117, 220)' },     // ADA - Blue
+            { bg: 'rgba(196, 166, 43, 0.2)', border: 'rgb(196, 166, 43)' }    // DOGE - Gold
+        ];
+        
+        async function loadPriceChart() {
+            try {
+                const response = await fetch(`/api/ohlcv?hours=${currentChartHours}`);
+                const result = await response.json();
+                
+                if (result.status !== 'success' || !result.data) {
+                    console.log('No OHLCV data available');
+                    return;
+                }
+                
+                const symbols = Object.keys(result.data);
+                const chartContainer = document.getElementById('price-chart-container');
+                
+                if (symbols.length === 0) {
+                    // Hide chart if no positions
+                    if (chartContainer) {
+                        chartContainer.style.display = 'none';
+                    }
+                    return;
+                }
+                
+                // Show chart container
+                if (chartContainer) {
+                    chartContainer.style.display = 'block';
+                }
+                
+                // Prepare datasets for Chart.js
+                const datasets = symbols.map((symbol, index) => {
+                    const symbolData = result.data[symbol];
+                    const color = chartColors[index % chartColors.length];
+                    const shortName = symbol.replace('/EUR', '');
+                    
+                    // Normalize prices to percentage change from first price
+                    const firstPrice = symbolData.prices[0] || 1;
+                    const normalizedPrices = symbolData.prices.map(p => ((p - firstPrice) / firstPrice) * 100);
+                    
+                    return {
+                        label: shortName,
+                        data: symbolData.timestamps.map((ts, i) => ({
+                            x: ts,
+                            y: normalizedPrices[i]
+                        })),
+                        borderColor: color.border,
+                        backgroundColor: color.bg,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        pointHoverRadius: 5
+                    };
+                });
+                
+                // Determine the visible time range from the data
+                let minTimestamp = Infinity;
+                let maxTimestamp = -Infinity;
+                symbols.forEach(symbol => {
+                    const timestamps = result.data[symbol].timestamps;
+                    if (timestamps.length > 0) {
+                        minTimestamp = Math.min(minTimestamp, timestamps[0]);
+                        maxTimestamp = Math.max(maxTimestamp, timestamps[timestamps.length - 1]);
+                    }
+                });
+                
+                // Create entry line annotations (only if within visible range)
+                const annotations = {};
+                const entries = result.entries || {};
+                symbols.forEach((symbol, index) => {
+                    const entryTime = entries[symbol];
+                    // Only show entry line if it's within the visible time range
+                    if (entryTime && entryTime >= minTimestamp && entryTime <= maxTimestamp) {
+                        const color = chartColors[index % chartColors.length];
+                        const shortName = symbol.replace('/EUR', '');
+                        annotations[`entry_${symbol}`] = {
+                            type: 'line',
+                            xMin: entryTime,
+                            xMax: entryTime,
+                            borderColor: color.border,
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            label: {
+                                display: true,
+                                content: `${shortName} Entry`,
+                                position: 'start',
+                                backgroundColor: color.border,
+                                color: '#fff',
+                                font: { size: 10, weight: 'bold' },
+                                padding: 4
+                            }
+                        };
+                    }
+                });
+                
+                // Create exit line annotations (red dashed lines for sold positions)
+                const exits = result.exits || [];
+                exits.forEach((exit, i) => {
+                    const exitTime = exit.time;
+                    if (exitTime && exitTime >= minTimestamp && exitTime <= maxTimestamp) {
+                        const shortName = exit.symbol.replace('/EUR', '');
+                        const pnlText = exit.pnl >= 0 ? `+${exit.pnl}€` : `${exit.pnl}€`;
+                        const exitColor = exit.pnl >= 0 ? '#28a745' : '#dc3545';
+                        annotations[`exit_${exit.symbol}_${i}`] = {
+                            type: 'line',
+                            xMin: exitTime,
+                            xMax: exitTime,
+                            borderColor: exitColor,
+                            borderWidth: 2,
+                            borderDash: [3, 3],
+                            label: {
+                                display: true,
+                                content: `${shortName} Exit ${pnlText}`,
+                                position: 'end',
+                                backgroundColor: exitColor,
+                                color: '#fff',
+                                font: { size: 10, weight: 'bold' },
+                                padding: 4
+                            }
+                        };
+                    }
+                });
+                
+                // Create or update chart
+                const ctx = document.getElementById('priceChart');
+                if (!ctx) return;
+                
+                if (priceChart) {
+                    priceChart.data.datasets = datasets;
+                    priceChart.options.plugins.annotation.annotations = annotations;
+                    priceChart.update('none');
+                } else {
+                    priceChart = new Chart(ctx, {
+                        type: 'line',
+                        data: { datasets },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        usePointStyle: true,
+                                        padding: 15,
+                                        font: { size: 12, weight: 'bold' }
+                                    }
+                                },
+                                title: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${context.parsed.y >= 0 ? '+' : ''}${context.parsed.y.toFixed(2)}%`;
+                                        }
+                                    }
+                                },
+                                annotation: {
+                                    annotations: annotations
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'hour',
+                                        displayFormats: {
+                                            hour: 'dd.MM HH:mm'
+                                        },
+                                        tooltipFormat: 'dd.MM.yyyy HH:mm'
+                                    },
+                                    grid: {
+                                        display: true,
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    ticks: {
+                                        maxRotation: 0,
+                                        autoSkip: true,
+                                        maxTicksLimit: 8
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: t('change_pct')
+                                    },
+                                    grid: {
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return (value >= 0 ? '+' : '') + value.toFixed(1) + '%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading price chart:', error);
+            }
+        }
+        
+        // ============================================================
+        // SERVICE CONTROL FUNCTIONS
+        // ============================================================
+        let svcActionInProgress = false;
+
+        async function loadServiceStatus() {
+            try {
+                const response = await fetch('/api/services/status');
+                if (!response.ok) return;
+                const data = await response.json();
+                const services = data.services;
+
+                // Update Bot indicator
+                const botInd = document.getElementById('svc-bot-indicator');
+                const botDetail = document.getElementById('svc-bot-detail');
+                const botStartBtn = document.getElementById('btn-svc-bot-start');
+                const botStopBtn = document.getElementById('btn-svc-bot-stop');
+                const botRestartBtn = document.getElementById('btn-svc-bot-restart');
+
+                if (services.bot.running) {
+                    botInd.style.background = '#198754';
+                    botDetail.textContent = t('svc_running') + (services.bot.pid ? ' (PID: ' + services.bot.pid + ')' : '');
+                    botStartBtn.disabled = true;
+                    botStopBtn.disabled = false;
+                    botRestartBtn.disabled = false;
+                } else {
+                    botInd.style.background = '#dc3545';
+                    botDetail.textContent = t('svc_stopped');
+                    botStartBtn.disabled = false;
+                    botStopBtn.disabled = true;
+                    botRestartBtn.disabled = true;
+                }
+
+                // Update Monitor indicator
+                const monInd = document.getElementById('svc-monitor-indicator');
+                const monDetail = document.getElementById('svc-monitor-detail');
+                const monStartBtn = document.getElementById('btn-svc-monitor-start');
+                const monStopBtn = document.getElementById('btn-svc-monitor-stop');
+                const monRestartBtn = document.getElementById('btn-svc-monitor-restart');
+
+                if (services.monitor.running) {
+                    monInd.style.background = '#198754';
+                    monDetail.textContent = t('svc_running') + (services.monitor.pid ? ' (PID: ' + services.monitor.pid + ')' : '');
+                    monStartBtn.disabled = true;
+                    monStopBtn.disabled = false;
+                    monRestartBtn.disabled = false;
+                } else {
+                    monInd.style.background = '#dc3545';
+                    monDetail.textContent = t('svc_stopped');
+                    monStartBtn.disabled = false;
+                    monStopBtn.disabled = true;
+                    monRestartBtn.disabled = true;
+                }
+
+                // Update Web UI indicator
+                const webuiInd = document.getElementById('svc-webui-indicator');
+                const webuiDetail = document.getElementById('svc-webui-detail');
+                const webuiStopBtn = document.getElementById('btn-svc-webui-stop');
+                const webuiRestartBtn = document.getElementById('btn-svc-webui-restart');
+
+                if (services.webui && services.webui.running) {
+                    webuiInd.style.background = '#198754';
+                    webuiDetail.textContent = t('svc_running') + (services.webui.pid ? ' (PID: ' + services.webui.pid + ')' : '');
+                    webuiStopBtn.disabled = false;
+                    webuiRestartBtn.disabled = false;
+                } else {
+                    webuiInd.style.background = '#dc3545';
+                    webuiDetail.textContent = t('svc_stopped');
+                    webuiStopBtn.disabled = true;
+                    webuiRestartBtn.disabled = true;
+                }
+            } catch (e) {
+                console.error('Service status error:', e);
+            }
+        }
+
+        async function serviceAction(service, action) {
+            if (svcActionInProgress) return;
+
+            // Confirmation for stop actions
+            if (action === 'stop') {
+                const nameMap = { bot: 'Trading Bot', monitor: 'Monitor', webui: 'Web UI' };
+                const msg = service === 'all'
+                    ? t('svc_confirm_stop_all')
+                    : t('svc_confirm_stop').replace('{service}', nameMap[service] || service);
+                if (!confirm(msg)) return;
+            }
+
+            svcActionInProgress = true;
+            const statusMsg = document.getElementById('svc-status-msg');
+            statusMsg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+            statusMsg.style.color = 'var(--text-secondary)';
+
+            // Disable all service buttons during action
+            document.querySelectorAll('[id^="btn-svc-"]').forEach(btn => btn.disabled = true);
+
+            // Actions that will kill the web UI — expect connection loss
+            const willLoseConnection = (service === 'webui' && (action === 'stop' || action === 'restart'))
+                || (service === 'all');
+
+            try {
+                const url = '/api/services/' + service + '/' + action;
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+
+                if (willLoseConnection) {
+                    if (service === 'all' && action === 'stop') {
+                        statusMsg.innerHTML = '<i class="fas fa-power-off"></i> ' + t('svc_webui_shutdown');
+                        statusMsg.style.color = '#dc3545';
+                    } else {
+                        statusMsg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + t('svc_webui_restarting');
+                        statusMsg.style.color = '#ffc107';
+                        // Try to reconnect after restart
+                        setTimeout(() => tryReconnect(), 4000);
+                    }
+                    svcActionInProgress = false;
+                    return;
+                }
+
+                if (data.status === 'success' || data.status === 'partial') {
+                    statusMsg.innerHTML = '<i class="fas fa-check"></i> ' + (data.message || 'OK');
+                    statusMsg.style.color = '#198754';
+                } else {
+                    statusMsg.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (data.message || 'Error');
+                    statusMsg.style.color = '#dc3545';
+                }
+            } catch (e) {
+                if (willLoseConnection) {
+                    if (action === 'stop' && (service === 'webui' || service === 'all')) {
+                        statusMsg.innerHTML = '<i class="fas fa-power-off"></i> ' + t('svc_webui_shutdown');
+                        statusMsg.style.color = '#dc3545';
+                    } else {
+                        statusMsg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + t('svc_webui_restarting');
+                        statusMsg.style.color = '#ffc107';
+                        setTimeout(() => tryReconnect(), 4000);
+                    }
+                } else {
+                    statusMsg.innerHTML = '<i class="fas fa-times"></i> ' + t('error_connection');
+                    statusMsg.style.color = '#dc3545';
+                }
+            }
+
+            // Refresh status after brief delay (only if not losing connection)
+            if (!willLoseConnection) {
+                setTimeout(async () => {
+                    await loadServiceStatus();
+                    svcActionInProgress = false;
+                    setTimeout(() => { statusMsg.innerHTML = ''; }, 5000);
+                }, 1500);
+            } else {
+                svcActionInProgress = false;
+            }
+        }
+
+        async function tryReconnect(attempts = 0) {
+            if (attempts > 10) {
+                const statusMsg = document.getElementById('svc-status-msg');
+                statusMsg.innerHTML = '<i class="fas fa-times"></i> ' + t('svc_webui_shutdown');
+                statusMsg.style.color = '#dc3545';
+                return;
+            }
+            try {
+                const response = await fetch('/api/services/status');
+                if (response.ok) {
+                    location.reload();
+                    return;
+                }
+            } catch (e) { /* expected during restart */ }
+            setTimeout(() => tryReconnect(attempts + 1), 2000);
+        }
+
+        // Settings Functions
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                if (response.ok) {
+                    const settings = await response.json();
+                    document.getElementById('input-position-size').value = settings.max_position_size || 10;
+                    document.getElementById('input-stop-loss').value = Math.abs(settings.max_loss_cutoff || 40);
+                    document.getElementById('input-profit-target').value = settings.min_profit_target || 5;
+                    document.getElementById('input-check-interval').value = settings.check_interval || 60;
+                    document.getElementById('input-critical-balance').value = settings.critical_balance_level || 5;
+                    document.getElementById('input-max-drawdown').value = Math.abs(settings.portfolio_drawdown_limit || 10);
+                    document.getElementById('input-trading-mode').value = settings.trading_mode || 'conservative';
+                    document.getElementById('input-scalping-profit-abs').value = settings.scalping_profit_abs || 0.25;
+                    updateModeIndicator(settings.trading_mode || 'conservative');
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+        
+        async function saveSettings() {
+            const statusEl = document.getElementById('settings-status');
+            const positionSize = parseFloat(document.getElementById('input-position-size').value);
+            const stopLoss = parseFloat(document.getElementById('input-stop-loss').value);
+            const profitTarget = parseFloat(document.getElementById('input-profit-target').value);
+            const checkInterval = parseInt(document.getElementById('input-check-interval').value);
+            const criticalBalance = parseFloat(document.getElementById('input-critical-balance').value);
+            const maxDrawdown = parseFloat(document.getElementById('input-max-drawdown').value);
+            const tradingMode = document.getElementById('input-trading-mode').value;
+            
+            // Validation
+            const scalpingProfitAbs = parseFloat(document.getElementById('input-scalping-profit-abs').value);
+            if (isNaN(positionSize) || positionSize < 5 || positionSize > 100) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_investment');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(stopLoss) || stopLoss < 5 || stopLoss > 80) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_stop_loss');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(profitTarget) || profitTarget < 1 || profitTarget > 50) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_profit_target');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(scalpingProfitAbs) || scalpingProfitAbs < 0.01 || scalpingProfitAbs > 10) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Scalping-Gewinn: 0.01-10€';
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(checkInterval) || checkInterval < 30 || checkInterval > 300) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_check_interval');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(criticalBalance) || criticalBalance < 0) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_min_balance');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            if (isNaN(maxDrawdown) || maxDrawdown < 5 || maxDrawdown > 50) {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_max_drawdown');
+                statusEl.style.color = '#ffcc00';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        max_position_size: positionSize,
+                        max_loss_cutoff: -stopLoss,  // Store as negative
+                        min_profit_target: profitTarget,
+                        check_interval: checkInterval,
+                        critical_balance_level: criticalBalance,
+                        portfolio_drawdown_limit: -maxDrawdown,  // Store as negative
+                        trading_mode: tradingMode,
+                        scalping_profit_abs: scalpingProfitAbs
+                    })
+                });
+                
+                if (response.ok) {
+                    statusEl.innerHTML = '<i class="fas fa-check"></i> ' + t('saved');
+                    statusEl.style.color = '#90EE90';
+                    setTimeout(() => { statusEl.innerHTML = ''; }, 3000);
+                } else {
+                    const err = await response.json();
+                    statusEl.innerHTML = '<i class="fas fa-times"></i> ' + (err.message || t('btn_error'));
+                    statusEl.style.color = '#ff6b6b';
+                }
+            } catch (error) {
+                statusEl.innerHTML = '<i class="fas fa-times"></i> ' + t('error_connection');
+                statusEl.style.color = '#ff6b6b';
+            }
+        }
+        
+        document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
+        
+        // Trading mode toggle: update indicator in real-time
+        function updateModeIndicator(mode) {
+            const indicator = document.getElementById('mode-indicator');
+            if (mode === 'scalping') {
+                indicator.textContent = t('mode_scalping_desc');
+                indicator.style.background = 'rgba(255, 193, 7, 0.3)';
+                indicator.style.color = '#ffe082';
+            } else if (mode === 'aggressive') {
+                indicator.textContent = t('mode_aggressive_desc');
+                indicator.style.background = 'rgba(255, 87, 34, 0.3)';
+                indicator.style.color = '#ffab91';
+            } else {
+                indicator.textContent = t('mode_conservative_desc');
+                indicator.style.background = 'rgba(76, 175, 80, 0.3)';
+                indicator.style.color = '#a5d6a7';
+            }
+            // Update select option labels for current language
+            const select = document.getElementById('input-trading-mode');
+            select.options[0].text = t('mode_conservative');
+            select.options[1].text = t('mode_aggressive');
+            select.options[2].text = t('mode_scalping');
+        }
+        document.getElementById('input-trading-mode').addEventListener('change', function() {
+            updateModeIndicator(this.value);
+        });
+        updateModeIndicator('conservative');  // default until settings load
+
+        // Chart range button handlers
+        document.querySelectorAll('.chart-range-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.chart-range-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update hours and reload chart
+                currentChartHours = parseInt(this.dataset.hours);
+                loadPriceChart();
+            });
+        });
+        
+        // Load trades on page load
+        loadSettings();
+        loadTrades();
+        loadPortfolio();
+        loadOpenOrders();
+        loadServiceStatus();
+        
+        // Load chart after a short delay (wait for portfolio to load first)
+        setTimeout(() => loadPriceChart(), 2000);
+        
+        // Auto-refresh every 5 seconds (chart every 60s, services every 10s)
+        setInterval(() => {
+            loadTrades();
+            loadPortfolio();
+            loadOpenOrders();
+        }, 5000);
+
+        setInterval(() => {
+            if (!svcActionInProgress) loadServiceStatus();
+        }, 10000);
+        
+        setInterval(() => {
+            loadPriceChart();
+        }, 60000);
+
+        // Legend update function
+        function updateLegend() {
+            const el = document.getElementById('legend-container');
+            if (!el) return;
+            el.innerHTML = `
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">
+                        <i class="fas fa-book"></i> ${t('legend_title')}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_pnl')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_unrealized')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_realized')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_winrate')}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_stoploss')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_profittarget')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_signal')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_minbalance')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_entry')}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_coins')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_coins2')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_ohlcv')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_eur')}</div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_drawdown')}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_tradingmode')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_profitgate')}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 8px;">${t('legend_maxpositions')}</div>
+                            <div style="margin-bottom: 8px;">${t('legend_lstm')}</div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <div class="col-12">
+                            ${t('legend_confidence')}
+                            <span style="color: var(--text-secondary);">0.00-0.10</span> ${t('legend_conf_low')} | 
+                            <span style="color: #17a2b8;">0.10-0.30</span> ${t('legend_conf_mid')} | 
+                            <span style="color: #28a745;">0.30-0.50</span> ${t('legend_conf_high')} | 
+                            <span style="color: #dc3545;">0.50+</span> ${t('legend_conf_very_high')}
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.7rem; color: var(--text-secondary);">
+                        ${t('legend_footer')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Apply language on load
+        applyLanguage();
+    </script>
+</body>
+</html>
