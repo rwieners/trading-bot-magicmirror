@@ -1,58 +1,58 @@
 # Trading Bot + MagicMirror
 
-LSTM-basierter Krypto-Trading-Bot für [Kraken](https://www.kraken.com/), mit Portfolio-Anzeige auf einem [MagicMirror²](https://magicmirror.builders/).
+LSTM-based crypto trading bot for [Kraken](https://www.kraken.com/), with a live portfolio display on a [MagicMirror²](https://magicmirror.builders/).
 
-Läuft 24/7 auf einem Raspberry Pi 4 — vollautomatisch mit 1-Minuten-Zyklen, automatischem Model-Retraining und Live-Spiegelanzeige.
+Runs 24/7 on a Raspberry Pi 4 — fully automated with 1-minute cycles, automatic model retraining, and a live mirror display.
 
 ## Features
 
-- **LSTM-Prognosen** — PyTorch-Modell sagt Preisbewegungen 1h voraus (15-Min-Kerzen, 12 Features)
-- **Profit-Gate-Strategie** — Trades nur wenn predicted move > Gebühren + Sicherheitsmarge
-- **3 Trading-Modi** — Conservative, Aggressive, Scalping (per Web-UI umschaltbar)
-- **Automatisches Retraining** — Modell wird alle 24h mit 180 Tagen Daten neu trainiert
-- **Kraken-Sync** — Kraken ist immer Datenmaster, Positionen werden automatisch abgeglichen
-- **Risk Management** — Stop-Loss, Profit-Target, Portfolio-Drawdown-Limit, Health-Checker
-- **MagicMirror-Modul** — Portfolio-Wert, P&L und Bot-Iteration live auf dem Spiegel
-- **Web Dashboard** — Trades, Performance-Charts, Swagger API (Port 8000)
-- **Backtesting** — Strategien mit historischen Daten validieren
+- **LSTM Predictions** — PyTorch model predicts price movements 1h ahead (15-min candles, 12 features)
+- **Profit-Gate Strategy** — Only trades when predicted move > fees + safety margin
+- **3 Trading Modes** — Conservative, Aggressive, Scalping (switchable via web UI)
+- **Automatic Retraining** — Model retrains every 24h using 180 days of data
+- **Kraken Sync** — Kraken is always the data master, positions are automatically reconciled
+- **Risk Management** — Stop-loss, profit target, portfolio drawdown limit, health checker
+- **MagicMirror Module** — Portfolio value, P&L, and bot iteration displayed live on the mirror
+- **Web Dashboard** — Trades, performance charts, Swagger API (port 8000)
+- **Backtesting** — Validate strategies against historical data
 
-## Unterstützte Coins
+## Supported Coins
 
-BTC, ETH, SOL, XRP, ADA, DOGE — alle gegen EUR (wegen Kraken EU/USDT-Restriktionen).
+BTC, ETH, SOL, XRP, ADA, DOGE — all traded against EUR (due to Kraken EU/USDT restrictions).
 
-## Architektur
+## Architecture
 
 ```
 broker/
-├── bot.py                  # Haupt-Orchestrator (1-Min-Zyklen)
-├── sync_kraken.py          # Kraken → DB Synchronisation
+├── bot.py                  # Main orchestrator (1-min cycles)
+├── sync_kraken.py          # Kraken → DB synchronization
 ├── data/
-│   ├── live_feed.py        # Live-Ticker & Kerzendaten
-│   ├── storage.py          # SQLite Trade-Datenbank
-│   └── coin_analyzer.py    # Coin-Analyse
+│   ├── live_feed.py        # Live ticker & candle data
+│   ├── storage.py          # SQLite trade database
+│   └── coin_analyzer.py    # Coin analysis
 ├── exchange/
-│   └── kraken_trader.py    # Kraken API (Buy/Sell via ccxt)
+│   └── kraken_trader.py    # Kraken API (buy/sell via ccxt)
 ├── models/
-│   ├── lstm_model.py       # LSTM-Modell (PyTorch)
-│   ├── features.py         # Feature Engineering (12 Features)
-│   └── model_trainer.py    # Training & Auto-Retrain
+│   ├── lstm_model.py       # LSTM model (PyTorch)
+│   ├── features.py         # Feature engineering (12 features)
+│   └── model_trainer.py    # Training & auto-retrain
 ├── strategies/
-│   └── profit_gate_strategy.py  # Profit-Gate Strategie
+│   └── profit_gate_strategy.py  # Profit-gate strategy
 ├── risk/
-│   ├── position_manager.py # Positionsverwaltung
-│   └── account_monitor.py  # Balance & Drawdown Monitoring
+│   ├── position_manager.py # Position management
+│   └── account_monitor.py  # Balance & drawdown monitoring
 └── utils/
-    ├── health_checker.py   # Error-Tracking, Auto-Pause
-    ├── logger.py           # Rotating Logs
-    └── dashboard.py        # Performance Reports
+    ├── health_checker.py   # Error tracking, auto-pause
+    ├── logger.py           # Rotating logs
+    └── dashboard.py        # Performance reports
 ```
 
 ## Setup
 
-### Voraussetzungen
+### Prerequisites
 
 - Python 3.11+
-- Kraken API Key (mit Trading-Berechtigung)
+- Kraken API key (with trading permissions)
 
 ### Installation
 
@@ -64,49 +64,49 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Konfiguration
+### Configuration
 
 ```bash
 cp .env.example .env
-# Kraken API Keys eintragen:
+# Add your Kraken API keys:
 #   KRAKEN_API_KEY=...
 #   KRAKEN_API_SECRET=...
 ```
 
-Trading-Parameter lassen sich über `config/user_settings.json` oder das Web-Dashboard anpassen:
+Trading parameters can be adjusted via `config/user_settings.json` or the web dashboard:
 
-| Parameter | Default | Beschreibung |
+| Parameter | Default | Description |
 |---|---|---|
-| `max_position_size` | 10 € | Maximale Positionsgröße |
-| `min_profit_target` | 5% | Profit-Target für Exits |
-| `max_loss_cutoff` | -40% | Stop-Loss |
+| `max_position_size` | 10 € | Maximum position size |
+| `min_profit_target` | 5% | Profit target for exits |
+| `max_loss_cutoff` | -40% | Stop-loss |
 | `trading_mode` | conservative | conservative / aggressive / scalping |
 
-### Starten
+### Running
 
 ```bash
-# Alles starten (Bot + Web-UI + MagicMirror API)
+# Start everything (bot + web UI + MagicMirror API)
 ./start.sh
 
-# Nur Bot
+# Bot only
 ./start.sh --bot-only
 
 # Status
 ./start.sh --status
 
-# Stoppen
+# Stop
 ./start.sh --stop
 ```
 
-## MagicMirror-Modul
+## MagicMirror Module
 
-Das `MMM-Portfolio`-Modul zeigt auf dem Spiegel:
-- Portfolio-Gesamtwert
-- Unrealisierte / realisierte P&L
-- Anzahl offener Positionen
-- Letztes Update + Bot-Iteration
+The `MMM-Portfolio` module displays on the mirror:
+- Total portfolio value
+- Unrealized / realized P&L
+- Number of open positions
+- Last update + bot iteration
 
-### Installation auf dem MagicMirror
+### Installation on MagicMirror
 
 ```bash
 cp -r raspi/MMM-Portfolio/ ~/MagicMirror/modules/MMM-Portfolio/
@@ -128,11 +128,11 @@ In `~/MagicMirror/config/config.js`:
 
 ## Raspberry Pi Deployment
 
-Siehe [docs/RASPI_DEPLOYMENT.md](docs/RASPI_DEPLOYMENT.md) für die komplette Anleitung mit systemd-Services.
+See [docs/RASPI_DEPLOYMENT.md](docs/RASPI_DEPLOYMENT.md) for the full guide with systemd services.
 
 ## API
 
-Die Portfolio-API (Port 8090) liefert:
+The portfolio API (port 8090) returns:
 
 ```json
 {
@@ -146,7 +146,7 @@ Die Portfolio-API (Port 8090) liefert:
 }
 ```
 
-Das Web-Dashboard (Port 8000) hat eine Swagger-UI unter `/api/docs`.
+The web dashboard (port 8000) includes a Swagger UI at `/api/docs`.
 
 ## Tests
 
@@ -154,16 +154,16 @@ Das Web-Dashboard (Port 8000) hat eine Swagger-UI unter `/api/docs`.
 pytest
 ```
 
-## Sicherheit
+## Security
 
-- API Keys ausschließlich über `.env` (gitignored)
-- Swagger-UI optional per Basic Auth geschützt (`SWAGGER_USERNAME` / `SWAGGER_PASSWORD` als Env-Variablen)
-- Siehe [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)
+- API keys stored exclusively in `.env` (gitignored)
+- Swagger UI optionally protected via Basic Auth (`SWAGGER_USERNAME` / `SWAGGER_PASSWORD` as env variables)
+- See [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)
 
 ## Disclaimer
 
-Dieses Projekt dient ausschließlich zu Bildungs- und Experimentierzwecken. Krypto-Trading birgt erhebliche Verlustrisiken. Kein Finanzberatung. Nutzung auf eigene Gefahr.
+This project is for educational and experimental purposes only. Crypto trading carries significant risk of loss. Not financial advice. Use at your own risk.
 
-## Lizenz
+## License
 
 MIT
