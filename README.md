@@ -1,6 +1,6 @@
 # Trading Bot + MagicMirror
 
-This module is nearly completly ai generated, so be check everything twice :-)
+This module is nearly completly ai generated, so check everything twice :-)
 
 LSTM-based crypto trading bot for [Kraken](https://www.kraken.com/), with a live portfolio display on a [MagicMirror²](https://magicmirror.builders/).
 
