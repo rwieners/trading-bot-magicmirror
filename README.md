@@ -1,5 +1,7 @@
 # Trading Bot + MagicMirror
 
+This module is nearly completly ai generated, so be check everything twice :-)
+
 LSTM-based crypto trading bot for [Kraken](https://www.kraken.com/), with a live portfolio display on a [MagicMirror²](https://magicmirror.builders/).
 
 Runs 24/7 on a Raspberry Pi 4 — fully automated with 1-minute cycles, automatic model retraining, and a live mirror display.
