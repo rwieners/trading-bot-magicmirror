@@ -132,3 +132,20 @@ Das MMM-Portfolio Modul ist in der MagicMirror `config.js` registriert:
 - **API-Endpoint:** http://localhost:8090/portfolio
 - **Update-Intervall:** 60 Sekunden
 - **Anzeige:** Realized P&L + Anzahl offene Trades
+
+## Display-Zeitplan (HDMI nachts aus)
+
+Der Monitor wird nachts automatisch abgeschaltet:
+
+- **23:00 Uhr:** HDMI aus
+- **06:00 Uhr:** HDMI an
+
+Installierte Cron-Jobs auf dem Raspberry Pi:
+
+```cron
+0 23 * * * /home/rene/bin/mirror-display.sh off >> /home/rene/trading-bot/logs/display_schedule.log 2>&1
+0 6 * * * /home/rene/bin/mirror-display.sh on >> /home/rene/trading-bot/logs/display_schedule.log 2>&1
+```
+
+Das zugehörige Script liegt im Repo unter `raspi/mirror-display.sh` und auf dem Pi unter `/home/rene/bin/mirror-display.sh`.
+Für Raspberry Pi OS Bookworm wird bevorzugt `wlr-randr` verwendet; ältere Setups fallen auf `vcgencmd` bzw. `xset` zurück.
