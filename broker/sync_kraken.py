@@ -118,13 +118,28 @@ def sync_kraken_to_db(db_path):
                 except Exception:
                     exit_price = row['entry_price']  # fallback
                 coin_qty = row['entry_size'] / row['entry_price'] if row['entry_price'] else 0
+                exit_value = exit_price * coin_qty
+                entry_fee = 0  # entry_fee not available in this context
+                cursor.execute('SELECT entry_fee, entry_value FROM trades WHERE id = ?', (trade_id,))
+                fee_row = cursor.fetchone()
+                if fee_row:
+                    entry_fee = fee_row['entry_fee'] or 0
+                    entry_value = fee_row['entry_value'] or row['entry_size']
+                else:
+                    entry_value = row['entry_size']
+                gross_pnl = (exit_price - row['entry_price']) * coin_qty
+                net_pnl = gross_pnl - entry_fee
+                pnl_pct = (net_pnl / (entry_value + entry_fee)) * 100 if entry_value > 0 else 0
+                trade_status = 'CLOSED_PROFIT' if net_pnl > 0 else 'CLOSED_LOSS' if net_pnl < 0 else 'CLOSED_BREAK_EVEN'
                 cursor.execute(
-                    'UPDATE trades SET status = "CLOSED_MANUAL_SYNC", exit_time = ?, '
-                    'exit_price = ?, exit_size = ? '
+                    'UPDATE trades SET status = ?, exit_time = ?, '
+                    'exit_price = ?, exit_size = ?, exit_value = ?, '
+                    'exit_fee = 0, pnl = ?, pnl_pct = ?, reason = "SYNC_KRAKEN" '
                     'WHERE id = ? AND (status = "OPEN" OR status IS NULL)',
-                    (now_ts_close, exit_price, coin_qty, trade_id)
+                    (trade_status, now_ts_close, exit_price, coin_qty, exit_value,
+                     net_pnl, pnl_pct, trade_id)
                 )
-                print(f"[SYNC_KRAKEN] Closed trade #{trade_id} {sym}: exit_price=€{exit_price:.4f}, coins={coin_qty:.6f}")
+                print(f"[SYNC_KRAKEN] Closed trade #{trade_id} {sym}: exit_price=€{exit_price:.4f}, coins={coin_qty:.6f}, PnL=€{net_pnl:.4f} ({pnl_pct:.2f}%)")
 
     now_ts = int(datetime.now().timestamp())
     MIN_POSITION_EUR = 1.00  # Ignore dust positions below €1.00

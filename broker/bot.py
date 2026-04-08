@@ -702,6 +702,19 @@ class TradingBot:
         exit_signals = []
         profit_target = self.strategy.min_profit_target  # e.g., 0.05 for 5%
         stop_loss = self.strategy.max_loss_cutoff  # e.g., -0.80 for -80%
+
+        # Load scalping absolute profit target from settings
+        from config.settings import TRADING_MODE
+        scalping_min_abs_profit = None
+        if TRADING_MODE == "scalping":
+            try:
+                import json as _json
+                settings_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'user_settings.json')
+                with open(settings_path, 'r') as f:
+                    _settings = _json.load(f)
+                scalping_min_abs_profit = float(_settings.get('scalping_profit_abs', 0.25))
+            except Exception:
+                scalping_min_abs_profit = 0.25
         
         for position_key, pos in self.position_manager.get_all_positions().items():
             pnl_pct = pos.unrealized_pnl_pct  # Already as decimal (0.05 = 5%)
@@ -723,6 +736,12 @@ class TradingBot:
                 # This prevents loss when entry_fee=0 (import bug) without double-counting when entry_fee is correct
                 safety_costs = max(actual_remaining_costs, min_roundtrip_cost - pos.entry_fee)
                 net_pnl = pos.unrealized_pnl - safety_costs
+
+                # In scalping mode: enforce absolute minimum profit (e.g. 0.50€)
+                if scalping_min_abs_profit is not None and net_pnl < scalping_min_abs_profit:
+                    logger.debug(f"[SCALPING] Trade #{trade_id} {actual_symbol}: P&L {pnl_pct*100:.2f}% but net €{net_pnl:.4f} < scalping target €{scalping_min_abs_profit:.2f} — holding")
+                    continue
+
                 if net_pnl > 0:
                     logger.info(f"💰 Trade #{trade_id} {actual_symbol} reached profit target: {pnl_pct*100:.2f}% >= {profit_target*100:.2f}% (net after costs: €{net_pnl:.4f}, costs=€{safety_costs:.4f})")
                     exit_signals.append(TradeSignal(
