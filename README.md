@@ -166,7 +166,7 @@ The portfolio API (port 8090) returns:
 The web dashboard (port 8000) is accessible from any device in the local network:
 
 ```
-http://192.168.178.254:8000
+http://<raspi-ip>:8000
 ```
 
 Includes a Swagger UI at `/api/docs`. Settings can be changed via the dashboard and take effect within 60 seconds.
@@ -176,10 +176,10 @@ Includes a Swagger UI at `/api/docs`. Settings can be changed via the dashboard 
 The MagicMirror display can be viewed and controlled remotely via VNC (wayvnc on Wayland/Bookworm):
 
 ```
-vnc://192.168.178.254:5900
+vnc://<raspi-ip>:5900
 ```
 
-On macOS: Finder → Go → Connect to Server, or `open vnc://192.168.178.254:5900`.
+On macOS: Finder → Go → Connect to Server, or `open vnc://<raspi-ip>:5900`.
 
 ## Tests
 

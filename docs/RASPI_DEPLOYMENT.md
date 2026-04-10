@@ -7,7 +7,7 @@
 | Gerät | Raspberry Pi 4 (8 GB RAM) |
 | OS | Debian GNU/Linux 12 (Bookworm) |
 | Architektur | aarch64 |
-| IP | 192.168.178.254 |
+| IP | `<raspi-ip>` |
 | User | rene |
 | Python | 3.11.2 (venv) |
 | PyTorch | 2.11.0+cpu |
@@ -72,7 +72,7 @@ Beide Services starten automatisch beim Boot und werden bei Fehlern neu gestarte
 
 - **Beschreibung:** Web UI für Trade-Monitoring und Bot-Einstellungen
 - **ExecStart:** `/home/rene/trading-bot/venv/bin/python3 /home/rene/trading-bot/scripts/web_ui.py`
-- **Port:** 8000 (LAN-weit erreichbar: `http://192.168.178.254:8000`)
+- **Port:** 8000 (LAN-weit erreichbar: `http://<raspi-ip>:8000`)
 - **Restart:** always (nach 10s)
 - **Funktionen:** Trades, Portfolio, Charts, Settings ändern (live übernommen)
 
@@ -85,7 +85,7 @@ Wayvnc läuft als User-Service für Remote-Zugriff auf das MagicMirror-Display:
 ```
 
 - **Port:** 5900 (kein Passwort, nur LAN)
-- **Verbindung:** `vnc://192.168.178.254:5900`
+- **Verbindung:** `vnc://<raspi-ip>:5900`
 - **Steuerung:** `systemctl --user start|stop|restart wayvnc`
 
 ## Nützliche Befehle
@@ -147,7 +147,7 @@ curl -s http://localhost:8090/portfolio | python3 -m json.tool
 ## SSH-Zugriff vom Mac
 
 ```bash
-ssh rene@192.168.178.254
+ssh rene@<raspi-ip>
 ```
 
 SSH-Key ist eingerichtet — kein Passwort nötig.
