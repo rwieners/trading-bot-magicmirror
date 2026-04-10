@@ -64,6 +64,30 @@ Beide Services starten automatisch beim Boot und werden bei Fehlern neu gestarte
 - **Restart:** always (nach 10s)
 - **Endpoint:** `GET /portfolio` — liest aus `trades.db` + live Kraken-Preise
 
+### Web Dashboard
+
+```
+/etc/systemd/system/trading-bot-ui.service
+```
+
+- **Beschreibung:** Web UI für Trade-Monitoring und Bot-Einstellungen
+- **ExecStart:** `/home/rene/trading-bot/venv/bin/python3 /home/rene/trading-bot/scripts/web_ui.py`
+- **Port:** 8000 (LAN-weit erreichbar: `http://192.168.178.254:8000`)
+- **Restart:** always (nach 10s)
+- **Funktionen:** Trades, Portfolio, Charts, Settings ändern (live übernommen)
+
+### VNC (wayvnc)
+
+Wayvnc läuft als User-Service für Remote-Zugriff auf das MagicMirror-Display:
+
+```
+~/.config/systemd/user/wayvnc.service
+```
+
+- **Port:** 5900 (kein Passwort, nur LAN)
+- **Verbindung:** `vnc://192.168.178.254:5900`
+- **Steuerung:** `systemctl --user start|stop|restart wayvnc`
+
 ## Nützliche Befehle
 
 ### Status prüfen
@@ -71,6 +95,7 @@ Beide Services starten automatisch beim Boot und werden bei Fehlern neu gestarte
 ```bash
 sudo systemctl status trading-bot
 sudo systemctl status mmm-portfolio
+sudo systemctl status trading-bot-ui
 ```
 
 ### Logs anzeigen
@@ -92,14 +117,17 @@ tail -f /home/rene/trading-bot/logs/bot.log
 # Neustarten
 sudo systemctl restart trading-bot
 sudo systemctl restart mmm-portfolio
+sudo systemctl restart trading-bot-ui
 
 # Stoppen
 sudo systemctl stop trading-bot
 sudo systemctl stop mmm-portfolio
+sudo systemctl stop trading-bot-ui
 
 # Starten
 sudo systemctl start trading-bot
 sudo systemctl start mmm-portfolio
+sudo systemctl start trading-bot-ui
 ```
 
 ### Portfolio API testen
@@ -131,7 +159,8 @@ Das MMM-Portfolio Modul ist in der MagicMirror `config.js` registriert:
 - **Position:** top_right
 - **API-Endpoint:** http://localhost:8090/portfolio
 - **Update-Intervall:** 60 Sekunden
-- **Anzeige:** Realized P&L + Anzahl offene Trades
+- **Anzeige:** P&L (offen + realisiert), Positionen, Iteration, Trading Mode
+- **Hinweis:** Portfoliowert wird aus Datenschutzgründen nicht angezeigt
 
 ## Display-Zeitplan (HDMI nachts aus)
 
