@@ -16,8 +16,10 @@ Runs 24/7 on a Raspberry Pi 4 — fully automated with 1-minute cycles, automati
 - **Automatic Retraining** — Model retrains every 24h using 180 days of data
 - **Kraken Sync** — Kraken is always the data master, positions are automatically reconciled
 - **Risk Management** — Stop-loss, profit target, portfolio drawdown limit, health checker
-- **MagicMirror Module** — Portfolio value, P&L, and bot iteration displayed live on the mirror
-- **Web Dashboard** — Trades, performance charts, Swagger API (port 8000)
+- **MagicMirror Module** — P&L, positions, bot iteration, and trading mode displayed live on the mirror
+- **Web Dashboard** — Trades, performance charts, settings, Swagger API (port 8000, LAN-accessible)
+- **Live Settings Reload** — All settings from `user_settings.json` are picked up within 60s, no bot restart needed
+- **VNC Access** — wayvnc for remote mirror display access via VNC viewer
 - **Backtesting** — Validate strategies against historical data
 
 ## Supported Coins
@@ -85,6 +87,13 @@ Trading parameters can be adjusted via `config/user_settings.json` or the web da
 | `min_profit_target` | 5% | Profit target for exits |
 | `max_loss_cutoff` | -40% | Stop-loss |
 | `trading_mode` | conservative | conservative / aggressive / scalping |
+| `scalping_profit_abs` | 0.5 € | Minimum absolute profit for scalping sells |
+| `portfolio_drawdown_limit` | -10% | Max portfolio drawdown before trading pauses |
+| `critical_balance_level` | 5 € | Emergency stop below this balance |
+| `warning_balance_level` | 20 € | Warning below this balance |
+| `check_interval` | 60s | Bot cycle interval |
+
+All settings are reloaded live every 30–60 seconds — no bot restart required.
 
 ### Running
 
@@ -105,11 +114,12 @@ Trading parameters can be adjusted via `config/user_settings.json` or the web da
 ## MagicMirror Module
 
 The `MMM-Portfolio` module displays on the mirror:
-- Total portfolio value
 - Unrealized / realized P&L
 - Number of open positions
 - Last update + bot iteration
 - Trading mode + scalping profit target
+
+> **Note:** The total portfolio value is intentionally hidden from the mirror display for privacy.
 
 ### Installation on MagicMirror
 
@@ -153,7 +163,23 @@ The portfolio API (port 8090) returns:
 }
 ```
 
-The web dashboard (port 8000) includes a Swagger UI at `/api/docs`.
+The web dashboard (port 8000) is accessible from any device in the local network:
+
+```
+http://192.168.178.254:8000
+```
+
+Includes a Swagger UI at `/api/docs`. Settings can be changed via the dashboard and take effect within 60 seconds.
+
+## Remote Access (VNC)
+
+The MagicMirror display can be viewed and controlled remotely via VNC (wayvnc on Wayland/Bookworm):
+
+```
+vnc://192.168.178.254:5900
+```
+
+On macOS: Finder → Go → Connect to Server, or `open vnc://192.168.178.254:5900`.
 
 ## Tests
 
