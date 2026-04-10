@@ -13,8 +13,8 @@ module.exports = NodeHelper.create({
     var self = this;
     var client = url.startsWith("https") ? https : http;
 
-    client
-      .get(url, function (res) {
+    var req = client
+      .get(url, { timeout: 30000 }, function (res) {
         var body = "";
         res.on("data", function (chunk) {
           body += chunk;
@@ -25,14 +25,20 @@ module.exports = NodeHelper.create({
             self.sendSocketNotification("PORTFOLIO_DATA", data);
           } catch (e) {
             self.sendSocketNotification("PORTFOLIO_DATA", {
-              error: "JSON parse error",
+              error: "JSON parse error: " + e.message,
             });
           }
         });
       })
       .on("error", function (e) {
         self.sendSocketNotification("PORTFOLIO_DATA", {
-          error: "API nicht erreichbar",
+          error: "API nicht erreichbar: " + e.message,
+        });
+      })
+      .on("timeout", function () {
+        req.destroy();
+        self.sendSocketNotification("PORTFOLIO_DATA", {
+          error: "API Timeout (30s)",
         });
       });
   },

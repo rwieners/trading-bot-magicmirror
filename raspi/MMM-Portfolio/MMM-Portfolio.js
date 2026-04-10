@@ -11,6 +11,7 @@ Module.register("MMM-Portfolio", {
   start: function () {
     this.portfolioData = null;
     this.loaded = false;
+    this.errorMessage = null;
     this.getData();
     this.scheduleUpdate();
   },
@@ -33,7 +34,12 @@ Module.register("MMM-Portfolio", {
 
   socketNotificationReceived: function (notification, payload) {
     if (notification === "PORTFOLIO_DATA") {
-      this.portfolioData = payload;
+      if (payload && payload.error && !payload.portfolio_value) {
+        this.errorMessage = payload.error;
+      } else {
+        this.portfolioData = payload;
+        this.errorMessage = null;
+      }
       this.loaded = true;
       this.updateDom();
     }
@@ -45,6 +51,18 @@ Module.register("MMM-Portfolio", {
 
     if (!this.loaded) {
       wrapper.innerHTML = "Lade Portfolio…";
+      wrapper.className += " dimmed light small";
+      return wrapper;
+    }
+
+    if (this.errorMessage) {
+      wrapper.innerHTML = this.errorMessage;
+      wrapper.className += " dimmed light small";
+      return wrapper;
+    }
+
+    if (!this.portfolioData) {
+      wrapper.innerHTML = "Keine Daten verfügbar";
       wrapper.className += " dimmed light small";
       return wrapper;
     }

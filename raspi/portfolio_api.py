@@ -101,7 +101,7 @@ def get_portfolio_data():
         }
     except Exception as e:
         logging.error(f"Portfolio error: {e}")
-        return None
+        return {"error": f"Portfolio Fehler: {e}"}
 
 def get_bot_iteration():
     """Read current bot iteration from status file."""
@@ -138,13 +138,14 @@ def get_trading_settings():
 def portfolio():
     data = get_portfolio_data()
     trading_mode, scalping_profit = get_trading_settings()
-    if data is not None:
+    if data is not None and "error" not in data:
         data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
         data['iteration'] = get_bot_iteration()
         data['trading_mode'] = trading_mode
         data['scalping_profit_abs'] = scalping_profit
         return jsonify(data)
     else:
+        error_msg = data.get("error", "Portfolio konnte nicht geladen werden.") if data else "Portfolio konnte nicht geladen werden."
         return jsonify({
             "portfolio_value": None,
             "currency": None,
@@ -152,7 +153,7 @@ def portfolio():
             "iteration": get_bot_iteration(),
             "trading_mode": trading_mode,
             "scalping_profit_abs": scalping_profit,
-            "error": "Portfolio konnte nicht geladen werden."
+            "error": error_msg,
         }), 500
 
 @app.route("/health")
