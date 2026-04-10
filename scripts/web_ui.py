@@ -256,7 +256,7 @@ def add_header(response):
     response.headers['Expires'] = '0'
     return response
 
-DB_PATH = '/Users/rene/dev/Broker/logs/trades.db'
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs', 'trades.db')
 
 def get_db_connection():
     """Get database connection"""
@@ -1964,4 +1964,4 @@ if __name__ == '__main__':
     print("="*60)
     print("\n✓ Starting server on http://localhost:8000")
     print("✓ Press Ctrl+C to stop\n")
-    app.run(debug=True, host='localhost', port=8000, use_reloader=False)
+    app.run(debug=False, host='0.0.0.0', port=8000, use_reloader=False)

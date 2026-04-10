@@ -1,0 +1,16 @@
+[Unit]
+Description=Trading Bot Web UI
+After=network-online.target mmm-portfolio.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rene
+WorkingDirectory=/home/rene/trading-bot
+ExecStart=/home/rene/trading-bot/venv/bin/python3 /home/rene/trading-bot/scripts/web_ui.py
+Restart=always
+RestartSec=10
+Environment=PATH=/home/rene/trading-bot/venv/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target

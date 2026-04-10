@@ -75,13 +75,6 @@ Module.register("MMM-Portfolio", {
 
     var data = this.portfolioData;
 
-    // Portfolio value — same color as rest of text (no green)
-    var valueDiv = document.createElement("div");
-    valueDiv.className = "portfolio-value";
-    valueDiv.innerHTML =
-      this.formatNumber(data.portfolio_value) + " " + data.currency;
-    wrapper.appendChild(valueDiv);
-
     // P&L info
     if (this.config.showPnL) {
       var pnlDiv = document.createElement("div");
