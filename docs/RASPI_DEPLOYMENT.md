@@ -152,6 +152,36 @@ ssh rene@<raspi-ip>
 
 SSH-Key ist eingerichtet — kein Passwort nötig.
 
+## Code-Deployment (kein Git auf dem Raspi)
+
+Auf dem Raspi ist kein Git installiert. Änderungen müssen per SCP übertragen werden.
+
+### Einzelne Dateien übertragen
+
+```bash
+# Vom Mac aus (im Projektverzeichnis):
+scp <datei> rene@<raspi-ip>:~/trading-bot/<datei>
+
+# Beispiel:
+scp config/settings.py rene@<raspi-ip>:~/trading-bot/config/settings.py
+scp scripts/web_ui.py rene@<raspi-ip>:~/trading-bot/scripts/web_ui.py
+scp scripts/templates/dashboard.html rene@<raspi-ip>:~/trading-bot/scripts/templates/dashboard.html
+```
+
+### Ganzes Projekt synchronisieren (ohne venv/logs/data)
+
+```bash
+rsync -avz --exclude='venv' --exclude='.venv' --exclude='logs' --exclude='data' \
+  --exclude='.git' --exclude='.env' --exclude='__pycache__' --exclude='*.pyc' \
+  /Users/rene/dev/trading-bot-magicmirror/ rene@<raspi-ip>:~/trading-bot/
+```
+
+### Nach dem Übertragen: Services neustarten
+
+```bash
+ssh rene@<raspi-ip> "sudo systemctl restart trading-bot trading-bot-ui"
+```
+
 ## MagicMirror Konfiguration
 
 Das MMM-Portfolio Modul ist in der MagicMirror `config.js` registriert:
