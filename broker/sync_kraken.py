@@ -98,9 +98,28 @@ def sync_kraken_to_db(db_path):
         open_by_symbol[sym]['trades'].append(row)
 
     # Close trades that are no longer on Kraken
+    # Also check balances for symbols NOT in ALLOWED_COINS but with open DB trades
+    # to avoid falsely closing positions that were just removed from the whitelist
     symbols_on_kraken = set(holdings.keys())
     symbols_in_db = set(open_by_symbol.keys())
-    to_close = list(symbols_in_db - symbols_on_kraken)
+    to_close_candidates = list(symbols_in_db - symbols_on_kraken)
+    to_close = []
+    for sym in to_close_candidates:
+        base = sym.split('/')[0]
+        balance = None
+        for key in [base, base.upper(), 'X'+base, 'X'+base.upper(), 'Z'+base, 'Z'+base.upper()]:
+            if key in all_balances:
+                balance = all_balances[key]
+                break
+        has_coins = False
+        if balance:
+            amt = balance.get('total', 0) if isinstance(balance, dict) else balance
+            if amt and amt > 0:
+                has_coins = True
+        if has_coins:
+            print(f"[SYNC_KRAKEN] {sym} removed from ALLOWED_COINS but still has coins on Kraken — keeping positions open")
+        else:
+            to_close.append(sym)
     if to_close:
         now_ts_close = int(datetime.now().timestamp())
         for sym in to_close:

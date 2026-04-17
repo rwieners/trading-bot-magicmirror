@@ -85,6 +85,10 @@ def api_sync_kraken():
       # Dynamisch alle erlaubten Symbole aus der globalen Whitelist übernehmen
       from config.settings import ALLOWED_COINS
       allowed_symbols = list(ALLOWED_COINS.keys())
+      # Also include symbols with open trades (e.g. removed from whitelist but still held)
+      for sym in open_symbols:
+        if sym not in allowed_symbols:
+          allowed_symbols.append(sym)
       holdings = {}
       all_balances = exchange.fetch_balance()
       for symbol in allowed_symbols:
