@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 # Toggle the Raspberry Pi MagicMirror display on or off.
 # Designed for Raspberry Pi OS Bookworm / Wayland (labwc), with fallbacks.
@@ -14,6 +13,8 @@ case "$ACTION" in
     ;;
 esac
 
+echo "$(date '+%Y-%m-%d %H:%M:%S') — mirror-display.sh $ACTION"
+
 STATE=0
 if [ "$ACTION" = "on" ]; then
   STATE=1
@@ -24,15 +25,25 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/1000}"
 # Preferred on Raspberry Pi OS Bookworm / labwc Wayland sessions.
 if command -v /usr/bin/wlr-randr >/dev/null 2>&1 && [ -d "$XDG_RUNTIME_DIR" ]; then
   if [ -z "${WAYLAND_DISPLAY:-}" ]; then
-    WAYLAND_SOCKET=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -type s -name "wayland-*" | sort | head -n1 || true)
+    WAYLAND_SOCKET=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -type s -name "wayland-*" 2>/dev/null | sort | head -n1 || true)
     if [ -n "$WAYLAND_SOCKET" ]; then
       export WAYLAND_DISPLAY="${WAYLAND_SOCKET##*/}"
     fi
   fi
 
-  OUTPUT="${MIRROR_OUTPUT:-$(/usr/bin/wlr-randr | /usr/bin/grep -m1 '^HDMI-A-' | /usr/bin/cut -d' ' -f1)}"
+  if [ -z "${WAYLAND_DISPLAY:-}" ]; then
+    echo "ERROR: No WAYLAND_DISPLAY found"
+    exit 1
+  fi
+
+  OUTPUT="${MIRROR_OUTPUT:-$(/usr/bin/wlr-randr 2>/dev/null | /usr/bin/grep -m1 '^HDMI-A-' | /usr/bin/cut -d' ' -f1 || true)}"
   if [ -n "$OUTPUT" ]; then
-    exec /usr/bin/wlr-randr --output "$OUTPUT" --"$ACTION"
+    echo "Running: wlr-randr --output $OUTPUT --$ACTION"
+    /usr/bin/wlr-randr --output "$OUTPUT" --"$ACTION"
+    echo "OK"
+    exit 0
+  else
+    echo "ERROR: No HDMI output found via wlr-randr"
   fi
 fi
 
