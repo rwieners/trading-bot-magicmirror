@@ -78,7 +78,7 @@ ALLOWED_COINS = {
     'SOL/EUR': {'withdrawal_fee': 0.00025, 'min_volume': 50000},  # 0.00025 SOL
     'XRP/EUR': {'withdrawal_fee': 0.10, 'min_volume': 50000},     # 0.10 XRP
     'ADA/EUR': {'withdrawal_fee': 0.70, 'min_volume': 50000},     # 0.70 ADA
-    'DOGE/EUR': {'withdrawal_fee': 1.00, 'min_volume': 50000},    # 1.00 DOGE
+    # 'DOGE/EUR': {'withdrawal_fee': 1.00, 'min_volume': 50000},    # 1.00 DOGE (entfernt: nicht mehr kaufen)
 }
 
 # Data Configuration

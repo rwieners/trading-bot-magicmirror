@@ -1095,10 +1095,10 @@ def api_save_settings():
         # Validate and update max_position_size
         if 'max_position_size' in data:
           value = float(data['max_position_size'])
-          if 0 <= value <= 100:
+          if 0 <= value <= 1000:
             settings['max_position_size'] = value
           else:
-            return jsonify({'status': 'error', 'message': 'Investition muss zwischen 0 und 100 liegen'}), 400
+            return jsonify({'status': 'error', 'message': 'Investition muss zwischen 0 und 1000 liegen'}), 400
 
         # Validate and update max_loss_cutoff (stop-loss)
         if 'max_loss_cutoff' in data:
