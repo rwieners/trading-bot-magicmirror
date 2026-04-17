@@ -208,3 +208,37 @@ Installierte Cron-Jobs auf dem Raspberry Pi:
 
 Das zugehörige Script liegt im Repo unter `raspi/mirror-display.sh` und auf dem Pi unter `/home/rene/bin/mirror-display.sh`.
 Für Raspberry Pi OS Bookworm wird bevorzugt `wlr-randr` verwendet; ältere Setups fallen auf `vcgencmd` bzw. `xset` zurück.
+
+### Technische Details
+
+Das Script setzt automatisch `XDG_RUNTIME_DIR` und `WAYLAND_DISPLAY`, da diese Variablen in der Cron-Umgebung nicht gesetzt sind. Es sucht den Wayland-Socket unter `/run/user/1000/wayland-*` und erkennt den HDMI-Output (`HDMI-A-2`) per `wlr-randr`.
+
+**Wichtig:** Das Script darf kein `set -euo pipefail` verwenden, da in der minimalen Cron-Umgebung sonst Befehle wie `find` oder `grep` (bei keinem Treffer) den Abbruch auslösen.
+
+### Troubleshooting
+
+```bash
+# Log prüfen
+cat /home/rene/trading-bot/logs/display_schedule.log
+
+# Manuell testen (simuliert Cron-Umgebung ohne gesetzte Variablen)
+env -i HOME=/home/rene PATH=/usr/bin:/bin /home/rene/bin/mirror-display.sh off
+
+# Monitor manuell ein-/ausschalten
+/home/rene/bin/mirror-display.sh on
+/home/rene/bin/mirror-display.sh off
+
+# HDMI-Output prüfen (welcher Output ist verbunden?)
+wlr-randr
+
+# Cron-Jobs anzeigen
+crontab -l
+```
+
+### Deployment nach Änderungen
+
+```bash
+# Vom Mac aus:
+scp raspi/mirror-display.sh rene@<raspi-ip>:~/bin/mirror-display.sh
+ssh rene@<raspi-ip> "chmod +x ~/bin/mirror-display.sh"
+```
