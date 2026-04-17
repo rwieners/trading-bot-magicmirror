@@ -1054,7 +1054,7 @@
                 close_error_generic: 'Fehler beim Schließen. Details in der Konsole.',
                 saved: 'Gespeichert!',
                 error_connection: 'Verbindungsfehler',
-                val_investment: 'Investition: 5-100€',
+                val_investment: 'Investition: 5-1000€',
                 val_stop_loss: 'Stop-Loss: 5-80%',
                 val_profit_target: 'Gewinnziel: 1-50%',
                 val_check_interval: 'Signalprüfung: 30-300 Sek',
@@ -1192,7 +1192,7 @@
                 close_error_generic: 'Error closing position. Check console for details.',
                 saved: 'Saved!',
                 error_connection: 'Connection error',
-                val_investment: 'Investment: 5-100€',
+                val_investment: 'Investment: 5-1000€',
                 val_stop_loss: 'Stop-Loss: 5-80%',
                 val_profit_target: 'Profit Target: 1-50%',
                 val_check_interval: 'Signal Check: 30-300 Sec',
@@ -2189,7 +2189,7 @@
             
             // Validation
             const scalpingProfitAbs = parseFloat(document.getElementById('input-scalping-profit-abs').value);
-            if (isNaN(positionSize) || positionSize < 5 || positionSize > 100) {
+            if (isNaN(positionSize) || positionSize < 5 || positionSize > 1000) {
                 statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + t('val_investment');
                 statusEl.style.color = '#ffcc00';
                 return;
