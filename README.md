@@ -193,9 +193,18 @@ pytest
 - Swagger UI optionally protected via Basic Auth (`SWAGGER_USERNAME` / `SWAGGER_PASSWORD` as env variables)
 - See [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)
 
-## Disclaimer
+## ⚠️ Disclaimer
 
-This project is for educational and experimental purposes only. Crypto trading carries significant risk of loss. Not financial advice. Use at your own risk.
+**Dies ist ein reines Lern- und Hobbyprojekt.** Es handelt sich ausdrücklich um **keine Anlageberatung und keine Anlageempfehlung.**
+
+- Der Handel mit Kryptowährungen ist hochspekulativ und kann zum **vollständigen Verlust des eingesetzten Kapitals** führen.
+- Vergangene Ergebnisse (auch aus Backtests) sind **kein Indikator für zukünftige Gewinne**.
+- Das LSTM-Modell und die implementierten Strategien sind **experimentell und nicht validiert** — sie können fehlerhafte Signale erzeugen.
+- Der Bot handelt vollautomatisiert. **Software-Fehler, API-Ausfälle oder Netzwerkprobleme** können zu unerwarteten Verlusten führen.
+- Der Autor übernimmt **keinerlei Haftung** für finanzielle Verluste, die durch die Nutzung dieser Software entstehen.
+- Wer echtes Geld einsetzt, tut dies **ausschließlich auf eigenes Risiko**.
+
+**Bitte investiere nur Geld, dessen Totalverlust du verschmerzen kannst.**
 
 ## License
 
