@@ -195,16 +195,16 @@ pytest
 
 ## ⚠️ Disclaimer
 
-**Dies ist ein reines Lern- und Hobbyprojekt.** Es handelt sich ausdrücklich um **keine Anlageberatung und keine Anlageempfehlung.**
+**This is a personal learning and hobby project.** It is explicitly **not financial advice and not an investment recommendation.**
 
-- Der Handel mit Kryptowährungen ist hochspekulativ und kann zum **vollständigen Verlust des eingesetzten Kapitals** führen.
-- Vergangene Ergebnisse (auch aus Backtests) sind **kein Indikator für zukünftige Gewinne**.
-- Das LSTM-Modell und die implementierten Strategien sind **experimentell und nicht validiert** — sie können fehlerhafte Signale erzeugen.
-- Der Bot handelt vollautomatisiert. **Software-Fehler, API-Ausfälle oder Netzwerkprobleme** können zu unerwarteten Verlusten führen.
-- Der Autor übernimmt **keinerlei Haftung** für finanzielle Verluste, die durch die Nutzung dieser Software entstehen.
-- Wer echtes Geld einsetzt, tut dies **ausschließlich auf eigenes Risiko**.
+- Trading cryptocurrencies is highly speculative and can result in the **complete loss of your invested capital**.
+- Past results (including backtests) are **no indicator of future profits**.
+- The LSTM model and implemented strategies are **experimental and unvalidated** — they may produce erroneous signals.
+- The bot trades fully automated. **Software bugs, API outages, or network issues** can lead to unexpected losses.
+- The author assumes **no liability** for any financial losses resulting from the use of this software.
+- Anyone using real money does so **entirely at their own risk**.
 
-**Bitte investiere nur Geld, dessen Totalverlust du verschmerzen kannst.**
+**Only invest money you can afford to lose entirely.**
 
 ## License
 
