@@ -56,3 +56,6 @@ temp/
 
 # Credentials
 CREDENTIALS.md
+
+# Internal docs (contain IPs/secrets)
+docs/RASPI_INTERNAL.md
