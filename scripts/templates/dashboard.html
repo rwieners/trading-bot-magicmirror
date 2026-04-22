@@ -302,8 +302,30 @@
         
         .table-responsive {
             border-radius: 8px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-width: 100%;
+        }
+        
+        /* Mobile scroll indicator */
+        @media (max-width: 768px) {
+            .table-responsive {
+                position: relative;
+            }
+            
+            .table-responsive::after {
+                content: '← Swipe zum Scrollen →';
+                position: absolute;
+                bottom: -28px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+                white-space: nowrap;
+                pointer-events: none;
+            }
         }
         
         .trades-grid {
@@ -592,7 +614,7 @@
         <!-- Header -->
         <div class="header">
             <h1><i class="fas fa-robot"></i> <span data-i18n="title">Trading Bot Dashboard</span></h1>
-            <p><span data-i18n="subtitle">Echtzeit-Handelsüberwachung • Auto-Refresh alle 5 Sekunden</span></p>
+            <p><span data-i18n="subtitle">Echtzeit-Handelsüberwachung • Auto-Refresh alle 20 Sekunden</span></p>
         </div>
         
         <!-- Settings Section -->
@@ -962,7 +984,7 @@
         const translations = {
             de: {
                 title: 'Trading Bot Dashboard',
-                subtitle: 'Echtzeit-Handelsüberwachung • Auto-Refresh alle 5 Sekunden',
+                subtitle: 'Echtzeit-Handelsüberwachung • Auto-Refresh alle 20 Sekunden',
                 settings_title: 'Trading Einstellungen',
                 lbl_trading_mode: 'Trading-Modus',
                 mode_conservative: 'Konservativ',
@@ -1100,7 +1122,7 @@
             },
             en: {
                 title: 'Trading Bot Dashboard',
-                subtitle: 'Real-time trade monitoring • Auto-refresh every 5 seconds',
+                subtitle: 'Real-time trade monitoring • Auto-refresh every 20 seconds',
                 settings_title: 'Trading Settings',
                 lbl_trading_mode: 'Trading Mode',
                 mode_conservative: 'Conservative',
@@ -1223,7 +1245,7 @@
                 legend_tradingmode: '<strong>Trading Mode</strong> – Conservative (fewer, safer trades) vs. Aggressive (more trades, smaller gains) vs. Scalping (maximum trade frequency, micro-profits)',
                 legend_maxpositions: '<strong>Max. Positions</strong> – Maximum number of simultaneously open positions',
                 legend_lstm: '<strong>LSTM Model</strong> – AI model (Long Short-Term Memory) for price prediction, retrained every 24h',
-                legend_footer: 'Trading Bot Dashboard • Data refreshes every 5 seconds • Prices from Kraken Exchange',
+                legend_footer: 'Trading Bot Dashboard • Data refreshes every 20 seconds • Prices from Kraken Exchange',
                 svc_title: 'Service Control',
                 svc_checking: 'Checking...',
                 svc_running: 'Running',
@@ -2308,12 +2330,12 @@
         // Load chart after a short delay (wait for portfolio to load first)
         setTimeout(() => loadPriceChart(), 2000);
         
-        // Auto-refresh every 5 seconds (chart every 60s, services every 10s)
+        // Auto-refresh every 20 seconds (chart every 60s, services every 10s)
         setInterval(() => {
             loadTrades();
             loadPortfolio();
             loadOpenOrders();
-        }, 5000);
+        }, 20000);
 
         setInterval(() => {
             if (!svcActionInProgress) loadServiceStatus();
