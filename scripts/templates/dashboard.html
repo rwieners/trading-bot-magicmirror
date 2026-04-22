@@ -614,7 +614,7 @@
         <!-- Header -->
         <div class="header">
             <h1><i class="fas fa-robot"></i> <span data-i18n="title">Trading Bot Dashboard</span></h1>
-            <p><span data-i18n="subtitle">Echtzeit-Handelsüberwachung • Auto-Refresh alle 20 Sekunden</span></p>
+            <p><span data-i18n="subtitle">Echtzeit-Handelsüberwachung • Auto-Refresh alle ${REFRESH_INTERVAL_MS / 1000} Sekunden</span></p>
         </div>
         
         <!-- Settings Section -->
@@ -979,12 +979,17 @@
         }
 
         // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        const REFRESH_INTERVAL_MS = 20000;  // Auto-refresh interval in milliseconds
+
+        // ============================================================
         // LANGUAGE SYSTEM (DE/EN)
         // ============================================================
         const translations = {
             de: {
                 title: 'Trading Bot Dashboard',
-                subtitle: 'Echtzeit-Handelsüberwachung • Auto-Refresh alle 20 Sekunden',
+                subtitle: `Echtzeit-Handelsüberwachung • Auto-Refresh alle ${REFRESH_INTERVAL_MS / 1000} Sekunden`,
                 settings_title: 'Trading Einstellungen',
                 lbl_trading_mode: 'Trading-Modus',
                 mode_conservative: 'Konservativ',
@@ -1107,7 +1112,7 @@
                 legend_tradingmode: '<strong>Trading Mode</strong> – Konservativ (wenige, sichere Trades) vs. Aggressiv (mehr Trades, kleinere Gewinne) vs. Scalping (maximale Trade-Frequenz, Micro-Profits)',
                 legend_maxpositions: '<strong>Max. Positionen</strong> – Maximale Anzahl gleichzeitig offener Positionen',
                 legend_lstm: '<strong>LSTM-Modell</strong> – KI-Modell (Long Short-Term Memory) zur Kursvorhersage, wird alle 24h neu trainiert',
-                legend_footer: 'Trading Bot Dashboard • Daten werden alle 5 Sekunden aktualisiert • Preise von Kraken Exchange',
+                legend_footer: `Trading Bot Dashboard • Daten werden alle ${REFRESH_INTERVAL_MS / 1000} Sekunden aktualisiert • Preise von Kraken Exchange`,
                 svc_title: 'Service-Steuerung',
                 svc_checking: 'Prüfe...',
                 svc_running: 'Läuft',
@@ -1122,7 +1127,7 @@
             },
             en: {
                 title: 'Trading Bot Dashboard',
-                subtitle: 'Real-time trade monitoring • Auto-refresh every 20 seconds',
+                subtitle: `Real-time trade monitoring • Auto-refresh every ${REFRESH_INTERVAL_MS / 1000} seconds`,
                 settings_title: 'Trading Settings',
                 lbl_trading_mode: 'Trading Mode',
                 mode_conservative: 'Conservative',
@@ -1245,7 +1250,7 @@
                 legend_tradingmode: '<strong>Trading Mode</strong> – Conservative (fewer, safer trades) vs. Aggressive (more trades, smaller gains) vs. Scalping (maximum trade frequency, micro-profits)',
                 legend_maxpositions: '<strong>Max. Positions</strong> – Maximum number of simultaneously open positions',
                 legend_lstm: '<strong>LSTM Model</strong> – AI model (Long Short-Term Memory) for price prediction, retrained every 24h',
-                legend_footer: 'Trading Bot Dashboard • Data refreshes every 20 seconds • Prices from Kraken Exchange',
+                legend_footer: `Trading Bot Dashboard • Data refreshes every ${REFRESH_INTERVAL_MS / 1000} seconds • Prices from Kraken Exchange`,
                 svc_title: 'Service Control',
                 svc_checking: 'Checking...',
                 svc_running: 'Running',
@@ -2330,12 +2335,12 @@
         // Load chart after a short delay (wait for portfolio to load first)
         setTimeout(() => loadPriceChart(), 2000);
         
-        // Auto-refresh every 20 seconds (chart every 60s, services every 10s)
+        // Auto-refresh every REFRESH_INTERVAL_MS (chart every 60s, services every 10s)
         setInterval(() => {
             loadTrades();
             loadPortfolio();
             loadOpenOrders();
-        }, 20000);
+        }, REFRESH_INTERVAL_MS);
 
         setInterval(() => {
             if (!svcActionInProgress) loadServiceStatus();
